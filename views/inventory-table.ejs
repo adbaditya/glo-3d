@@ -1,0 +1,157 @@
+<!-- views/inventory-table.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Table</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Inventory Management</h1>
+
+        <!-- Search and Filters -->
+        <div class="bg-white p-4 rounded-lg shadow mb-6">
+            <form action="/inventory-table" method="GET" class="flex flex-wrap gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value="<%= search %>"
+                        placeholder="Search inventory..." 
+                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                </div>
+                <div class="flex gap-2">
+                    <select name="limit" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="25" <%= pagination.limit === 25 ? 'selected' : '' %>>25 per page</option>
+                        <option value="50" <%= pagination.limit === 50 ? 'selected' : '' %>>50 per page</option>
+                        <option value="100" <%= pagination.limit === 100 ? 'selected' : '' %>>100 per page</option>
+                    </select>
+                    <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Vehicle
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            VIN
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Trim
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Location
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Mileage
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Stock Number
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Make
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Year
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% inventory.forEach(item => { %>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">
+                                    <%= item.fields?.model || 'N/A' %>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <%= item.fields?.make || 'N/A' %> | <%= item.fields?.year || 'N/A' %>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= item.vin || 'N/A' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= item.fields?.trim || 'N/A' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= item.fields?.location || 'N/A' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= item.fields?.mileage ? Number(item.fields.mileage).toLocaleString() : 'N/A' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= item.stock_number || 'N/A' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= item.fields?.make || 'N/A' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= item.fields?.year || 'N/A' %>
+                            </td>
+                        </tr>
+                    <% }); %>
+
+                    <% if (inventory.length === 0) { %>
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                No inventory items found
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-700">
+                    Showing <%= Math.min((pagination.current - 1) * pagination.limit + 1, inventory.length) %> 
+                    to <%= Math.min(pagination.current * pagination.limit, inventory.length) %> 
+                    of <%= inventory.length %> results
+                </span>
+            </div>
+            <div class="flex gap-2">
+                <% if (pagination.current > 1) { %>
+                    <a href="<%= `${pagination.baseUrl}?page=${pagination.current - 1}&limit=${pagination.limit}&search=${search}` %>" 
+                       class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                        Previous
+                    </a>
+                <% } %>
+                
+                <% if (pagination.current < pagination.total) { %>
+                    <a href="<%= `${pagination.baseUrl}?page=${pagination.current + 1}&limit=${pagination.limit}&search=${search}` %>"
+                       class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                        Next
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add any client-side JavaScript here
+        document.addEventListener('DOMContentLoaded', function() {
+            // Example: Add sort functionality
+            const tableHeaders = document.querySelectorAll('th');
+            tableHeaders.forEach(header => {
+                header.style.cursor = 'pointer';
+                header.addEventListener('click', () => {
+                    // Add sorting logic here
+                });
+            });
+        });
+    </script>
+</body>
+</html>
