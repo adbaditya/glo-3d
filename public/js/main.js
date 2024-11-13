@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         } catch (error) {
             console.error('Error showing car details:', error);
-            alert('There was an error displaying the car details. Please try again.');
+            console.log('There was an error displaying the car details. Please try again.');
         }
     }
 
@@ -442,6 +442,8 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const src = button.dataset.src;
             const fields = JSON.parse(button.dataset.fields);
+            console.log('Fields String:', fields); // Log the JSON string
+            
 
             if (!src || !fields) {
                 throw new Error('Missing required data attributes');
@@ -450,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function () {
             showCarDetails(src, fields);
         } catch (error) {
             console.error('Error in handleCarDetails:', error);
-            alert('Error loading car details. Please try again.');
+            console.log('Error loading car details. Please try again.');
         }
     };
 
