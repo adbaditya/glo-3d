@@ -17,7 +17,9 @@
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization"
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Content-Security-Policy": "frame-ancestors 'self' https://*.hubspot.com https://*.hsforms.com",
+        "X-Frame-Options": "ALLOW-FROM https://*.hubspot.com"
       }
     },
     {
@@ -38,8 +40,12 @@
       "source": "/(.*)",
       "headers": [
         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'self' https://*.hubspot.com"
+          "value": "frame-ancestors 'self' https://*.hubspot.com https://*.hsforms.com"
         },
         {
           "key": "X-Frame-Options",
