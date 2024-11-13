@@ -1,20 +1,5 @@
 // public/js/main.js
 
-// Add these helper functions at the top of your main.js
-function sendMessage(type, data) {
-    window.parent.postMessage({ type, ...data }, '*');
-}
-
-function showAlert(message) {
-    if (window.parent === window) {
-        // If not in iframe, use regular alert
-        alert(message);
-    } else {
-        // If in iframe, use postMessage
-        sendMessage('SHOW_ALERT', { message });
-    }
-}
-
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -304,8 +289,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleFilterSubmit(e) {
         e.preventDefault();
 
-
-
         // Get all car elements
         const carGrid = document.querySelector('.car-grid');
         if (!carGrid) return;
@@ -368,12 +351,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const formData = new FormData(this);
         const params = new URLSearchParams(formData);
         window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
-        // Get form data
-        const filters = Object.fromEntries(formData.entries());
-        // Send message to parent if in iframe
-        if (window.parent !== window) {
-            sendMessage('FORM_SUBMIT', { formData: filters });
-        }
     }
 
     function handleFilterReset() {
@@ -463,24 +440,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Set up global handlers
     window.handleCarDetails = function (button) {
         try {
-            const src = button.getAttribute('data-src');
-            const fieldsStr = button.getAttribute('data-fields');
+            const src = button.dataset.src;
+            const fields = JSON.parse(button.dataset.fields);
 
-            if (!src || !fieldsStr) {
+            if (!src || !fields) {
                 throw new Error('Missing required data attributes');
             }
-
-            const fields = JSON.parse(fieldsStr);
-
-            // Send message to parent if in iframe
-            if (window.parent !== window) {
-                sendMessage('SHOW_CAR_DETAILS', {
-                    src,
-                    fields,
-                    carData: fields
-                });
-            }
-
 
             showCarDetails(src, fields);
         } catch (error) {
@@ -507,29 +472,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {
-        filterForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const filters = Object.fromEntries(formData.entries());
-
-            // Send to parent if in iframe
-            if (window.parent !== window) {
-                sendMessage('FORM_SUBMIT', { formData: filters });
-            }
-
-            // Continue with local filtering
-            handleFilterSubmit.call(this, e);
-        });
+        filterForm.addEventListener('submit', handleFilterSubmit);
     }
 });
-
-// Add CORS headers to your fetch requests
-function fetchWithCors(url, options = {}) {
-    return fetch(url, {
-        ...options,
-        headers: {
-            ...options.headers,
-            'Access-Control-Allow-Origin': '*'
-        }
-    });
-}
