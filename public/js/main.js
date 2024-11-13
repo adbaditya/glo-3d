@@ -475,3 +475,14 @@ document.addEventListener('DOMContentLoaded', function () {
         filterForm.addEventListener('submit', handleFilterSubmit);
     }
 });
+
+// Add CORS headers to your fetch requests
+function fetchWithCors(url, options = {}) {
+    return fetch(url, {
+        ...options,
+        headers: {
+            ...options.headers,
+            'Access-Control-Allow-Origin': '*'
+        }
+    });
+}
