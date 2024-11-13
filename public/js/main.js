@@ -21,9 +21,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Vehicle info configuration
     const infoFields = [
-        { key: 'condition', icon: '🔍', label: 'Condition' },
+        { key: 'location', icon: '🔍', label: 'Location' },
         { key: 'car_type', icon: '🚗', label: 'Car Type' },
-        { key: 'mileage', icon: '📍', label: 'Mileage' },
+        { key: 'condition', icon: '📍', label: 'Condition' },
+        { key: 'mileage', icon: '⚡', label: 'Mileage' },
         { key: 'transmission', icon: '⚙️', label: 'Transmission' },
         { key: 'exterior_color', icon: '🎨', label: 'Exterior Color' },
         { key: 'fuel_type', icon: '⛽', label: 'Fuel Type' },
@@ -93,8 +94,27 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Update Inspection Status
-            const inspectionStatus = document.getElementById('inspectionStatus');
-            inspectionStatus.textContent = fields['1729543306380'] || 'Unknown';
+            const inspectionContainer = document.getElementById('inspectionContainer');
+            const inspectionLink = document.getElementById('inspectionLink');
+
+            if (inspectionContainer && inspectionLink) {
+                const inspectionStatus = fields['1729543306380'] || 'Unknown';
+                inspectionContainer.classList.remove('hidden');
+                
+                // Reset classes first
+                inspectionLink.className = 'inline-block text-white px-4 py-2 rounded text-center w-full';
+                
+                if (inspectionStatus) {
+                    inspectionLink.href = fields['1729543306380'];
+                    inspectionLink.textContent = `Inspection Report`;
+                    
+                    inspectionLink.classList.add('bg-green-600', 'hover:bg-green-700');
+                } else {
+                    inspectionLink.href = '#';
+                    inspectionLink.textContent = 'Inspection Status: Unknown';
+                    inspectionLink.classList.add('bg-gray-600', 'hover:bg-gray-700', 'opacity-50', 'cursor-not-allowed');
+                }
+            }
 
             // Update Features
             updateFeatures(fields.features);
@@ -159,19 +179,23 @@ document.addEventListener('DOMContentLoaded', function () {
     function closeModal() {
         const modal = document.getElementById('carModal');
         const carfaxLink = document.getElementById('carfaxLink');
-        
+
         // Reset modal
         modal.classList.add('hidden');
         modal.classList.remove('flex');
-        
+
         // Clear containers
         iframeContainer.innerHTML = '';
         vehicleInfoContainer.innerHTML = '';
-        
+
         // Reset Carfax button
         carfaxLink.classList.remove('opacity-50', 'cursor-not-allowed');
         carfaxLink.textContent = 'View Carfax Report';
         carfaxLink.href = '#';
+
+        inspectionLink.classList.remove('opacity-50', 'cursor-not-allowed');
+        inspectionLink.textContent = 'View Inspection Report';
+        inspectionLink.href = '#';
     }
 
     function updateVehicleInfo(fields) {
@@ -225,66 +249,66 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Add this script to your page or a separate .js file
-document.addEventListener('DOMContentLoaded', function() {
-    const makeSelect = document.querySelector('select[name="make"]');
-    const modelSelect = document.querySelector('select[name="model"]');
-    const yearSelect = document.querySelector('select[name="year"]');
-    const locationSelect = document.querySelector('select[name="location"]');
-    
-    // Store all initial options
-    const allModels = Array.from(modelSelect.options).map(opt => ({
-      value: opt.value,
-      text: opt.text,
-      make: opt.dataset.make
-    }));
-  
-    // Update models when make changes
-    makeSelect.addEventListener('change', function() {
-      const selectedMake = this.value;
-      
-      // Clear current model options
-      modelSelect.innerHTML = '<option value="">All Models</option>';
-      
-      // If no make is selected, show all models
-      if (!selectedMake) {
-        allModels.forEach(model => {
-          if (model.value) {
-            const option = new Option(model.text, model.value);
-            modelSelect.add(option);
-          }
+    document.addEventListener('DOMContentLoaded', function () {
+        const makeSelect = document.querySelector('select[name="make"]');
+        const modelSelect = document.querySelector('select[name="model"]');
+        const yearSelect = document.querySelector('select[name="year"]');
+        const locationSelect = document.querySelector('select[name="location"]');
+
+        // Store all initial options
+        const allModels = Array.from(modelSelect.options).map(opt => ({
+            value: opt.value,
+            text: opt.text,
+            make: opt.dataset.make
+        }));
+
+        // Update models when make changes
+        makeSelect.addEventListener('change', function () {
+            const selectedMake = this.value;
+
+            // Clear current model options
+            modelSelect.innerHTML = '<option value="">All Models</option>';
+
+            // If no make is selected, show all models
+            if (!selectedMake) {
+                allModels.forEach(model => {
+                    if (model.value) {
+                        const option = new Option(model.text, model.value);
+                        modelSelect.add(option);
+                    }
+                });
+                return;
+            }
+
+            // Filter models for selected make
+            const filteredModels = allModels.filter(model =>
+                model.make === selectedMake
+            );
+
+            // Add filtered models to select
+            filteredModels.forEach(model => {
+                if (model.value) {
+                    const option = new Option(model.text, model.value);
+                    modelSelect.add(option);
+                }
+            });
         });
-        return;
-      }
-      
-      // Filter models for selected make
-      const filteredModels = allModels.filter(model => 
-        model.make === selectedMake
-      );
-      
-      // Add filtered models to select
-      filteredModels.forEach(model => {
-        if (model.value) {
-          const option = new Option(model.text, model.value);
-          modelSelect.add(option);
-        }
-      });
+
+        // Form submit handler for analytics or additional processing
+        document.getElementById('filterForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Get all filter values
+            const filters = {
+                make: makeSelect.value,
+                model: modelSelect.value,
+                year: yearSelect.value,
+                location: locationSelect.value
+            };
+
+            // Update URL with filter parameters
+            const searchParams = new URLSearchParams(filters);
+            window.location.href = `${window.location.pathname}?${searchParams.toString()}`;
+        });
     });
-  
-    // Form submit handler for analytics or additional processing
-    document.getElementById('filterForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Get all filter values
-      const filters = {
-        make: makeSelect.value,
-        model: modelSelect.value,
-        year: yearSelect.value,
-        location: locationSelect.value
-      };
-      
-      // Update URL with filter parameters
-      const searchParams = new URLSearchParams(filters);
-      window.location.href = `${window.location.pathname}?${searchParams.toString()}`;
-    });
-  });
 });

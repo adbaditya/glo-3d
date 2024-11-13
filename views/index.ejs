@@ -68,13 +68,13 @@
                             class="w-full h-48 object-cover">
                         <!-- Certification Icons -->
                         <div class="absolute top-2 left-2 flex gap-2" style="display: none;">
-                            <img src="/images/auto-finance-icon.png" alt="Auto Finance" class="h-6">
+                            
                         </div>
                     </div>
 
                     <!-- Car Details -->
                     <div class="p-4">
-                        <h3 class="text-xl font-bold car-name">
+                        <h3 class="text-xl font-bold car-name text-center">
                             <%= car.fields?.year || '' %>
                                 <%= car.fields?.make ? car.fields.make.toUpperCase() : '' %>
                                     <%= car.fields?.model || '' %>
@@ -87,6 +87,9 @@
                         <p class="text-lg font-bold mb-2">
                             <%= car.fields?.mileage ? parseInt(car.fields.mileage).toLocaleString() : '0' %><span
                                     class="text-sm ml-1">Km.</span>
+                                    <span
+                                    class="ml-1">$</span>
+                                    <%= car.fields?.price ? parseInt(car.fields.price).toLocaleString() : '0' %>        
                         </p>
 
                         <!-- VIN and Stock Number -->
@@ -104,7 +107,7 @@
                                 data-fields='<%= JSON.stringify({...car.fields, features: car.features}) %>'
                                 onclick="handleCarDetails(this)"
                                 class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">
-                                Quick Spin
+                                View Details
                             </button>
                         </div>
                     </div>
@@ -148,12 +151,14 @@
                                     <div id="carfaxContainer" class="hidden">
                                         <a id="carfaxLink" href="#" target="_blank"
                                             class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center w-full">
-                                            View Carfax Report
+                                            Carfax Report
                                         </a>
                                     </div>
-                                    <div id="inspectionContainer" class="text-gray-700 pt-4">
-                                        <span class="font-medium">Inspection Status: </span>
-                                        <span id="inspectionStatus">Unknown</span>
+                                    <div id="inspectionContainer" class="hidden pt-4">
+                                        <a id="inspectionLink" href="#" target="_blank"
+                                            class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-center w-full">
+                                            Inspection Report
+                                        </a>
                                     </div>
                                 </div>
                             </div>

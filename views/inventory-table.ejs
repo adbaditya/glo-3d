@@ -42,62 +42,64 @@
                 <thead>
                     <tr class="bg-gray-50">
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Vehicle
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            VIN
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Trim
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Location
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Mileage
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Stock Number
+                            Year
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Make
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Year
+                            Model
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Trim
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Mileage
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            VIN
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Location
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Stock Number
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Cost
                         </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     <% inventory.forEach(item => { %>
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">
-                                    <%= item.fields?.model || 'N/A' %>
-                                </div>
-                                <div class="text-sm text-gray-500">
-                                    <%= item.fields?.make || 'N/A' %> | <%= item.fields?.year || 'N/A' %>
-                                </div>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= item.fields?.year || 'N/A' %>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <%= item.vin || 'N/A' %>
+                                <%= item.fields?.make || 'N/A' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <%= item.fields?.model || 'N/A' %>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <%= item.fields?.trim || 'N/A' %>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <%= item.fields?.location || 'N/A' %>
+                                <%= item.fields?.mileage ? Number(item.fields.mileage).toLocaleString() : 'N/A' %>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <%= item.fields?.mileage ? Number(item.fields.mileage).toLocaleString() : 'N/A' %>
+                                <%= item.vin || 'N/A' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <%= item.fields?.location || 'N/A' %>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <%= item.stock_number || 'N/A' %>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <%= item.fields?.make || 'N/A' %>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <%= item.fields?.year || 'N/A' %>
+                                <span
+                                    class="text-sm ml-1">$</span><%= item.fields.price || '0' %>
                             </td>
                         </tr>
                     <% }); %>
