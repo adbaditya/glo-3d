@@ -6,6 +6,21 @@ require('dotenv').config();
 
 const app = express();
 
+// CORS
+app.use(cors({
+  origin: '*', // Configure this more strictly in production
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// Add security headers
+app.use((req, res, next) => {
+  res.header('Content-Security-Policy', "frame-ancestors 'self' https://*.hubspot.com");
+  res.header('X-Frame-Options', 'ALLOW-FROM https://*.hubspot.com');
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware
