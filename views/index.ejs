@@ -135,8 +135,7 @@
 
                         <!-- Action Buttons -->
                         <div class="flex flex-col gap-2 pt-4">
-                            <button data-src="<%= car.src %>"
-                                data-fields="<%= JSON.stringify({...car.fields, features: car.features}) %>"
+                            <button data-vin="<%= car.vin || '' %>" data-src="<%= car.src || '' %>"
                                 onclick="handleCarDetails(this)"
                                 class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">
                                 View Details
@@ -236,6 +235,34 @@
                 const filterForm = document.getElementById('filterForm');
                 const showCarsButton = document.getElementById('showCarsButton');
                 const resetFilters = document.getElementById('resetFilters');
+                const modal = document.getElementById('carModal');
+                const modalTitle = document.getElementById('modalTitle');
+
+                window.closeModal = function () {
+                    const modal = document.getElementById('carModal');
+                    const carfaxLink = document.getElementById('carfaxLink');
+                    const inspectionLink = document.getElementById('inspectionLink');
+                    const iframeContainer = document.getElementById('iframeContainer');
+                    const vehicleInfoContainer = document.getElementById('vehicleInfoContainer');
+
+                    // Reset modal
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+
+                    // Clear containers
+                    iframeContainer.innerHTML = '';
+                    vehicleInfoContainer.innerHTML = '';
+
+                    // Reset Carfax button
+                    carfaxLink.classList.remove('opacity-50', 'cursor-not-allowed');
+                    carfaxLink.textContent = 'View Carfax Report';
+                    carfaxLink.href = '#';
+
+                    // Reset Inspection button
+                    inspectionLink.classList.remove('opacity-50', 'cursor-not-allowed');
+                    inspectionLink.textContent = 'View Inspection Report';
+                    inspectionLink.href = '#';
+                };
 
                 // Add click event listener to the Show Cars button
                 if (showCarsButton) {
@@ -313,6 +340,39 @@
                     });
                 }
 
+                window.handleCarDetails = async function (button) {
+                    try {
+                        const vin = button.dataset.vin;
+                        const src = button.dataset.src;
+
+                        if (!vin || !src) {
+                            throw new Error('Missing VIN or source URL');
+                        }
+
+                        // Fetch car details from API
+                        const response = await fetch(`/api/inventory/car/${vin}`);
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch car details');
+                        }
+
+                        const carData = await response.json();
+
+                        // Process the fields
+                        const fields = {
+                            ...carData.fields,
+                            features: carData.features,
+                            '1729543266746': carData.fields['1729543266746'], // Carfax URL
+                            '1729543306380': carData.fields['1729543306380']  // Inspection Status
+                        };
+
+                        showCarDetails(src, fields);
+
+                    } catch (error) {
+                        console.error('Error in handleCarDetails:', error);
+                        console.log('Error loading car details. Please try again.');
+                    }
+                };
+
                 // Function to update car grid with new data
                 function updateCarGrid(inventory) {
                     const carGrid = document.querySelector('.car-grid');
@@ -371,28 +431,6 @@
             `;
                         carGrid.appendChild(message);
                     }
-                }
-
-                function closeModal() {
-                    const modal = document.getElementById('carModal');
-                    const carfaxLink = document.getElementById('carfaxLink');
-
-                    // Reset modal
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-
-                    // Clear containers
-                    iframeContainer.innerHTML = '';
-                    vehicleInfoContainer.innerHTML = '';
-
-                    // Reset Carfax button
-                    carfaxLink.classList.remove('opacity-50', 'cursor-not-allowed');
-                    carfaxLink.textContent = 'View Carfax Report';
-                    carfaxLink.href = '#';
-
-                    inspectionLink.classList.remove('opacity-50', 'cursor-not-allowed');
-                    inspectionLink.textContent = 'View Inspection Report';
-                    inspectionLink.href = '#';
                 }
 
                 modal.addEventListener('click', function (e) {
