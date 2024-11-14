@@ -13,19 +13,35 @@
   "routes": [
     {
       "src": "/js/(.*)",
-      "dest": "/public/js/$1"
+      "dest": "/public/js/$1",
+      "headers": {
+        "Content-Security-Policy": "frame-ancestors 'self' https://*.hubspot.com https://*.hsforms.com",
+        "X-Frame-Options": "ALLOW-FROM https://*.hubspot.com"
+      }
     },
     {
       "src": "/css/(.*)",
-      "dest": "/public/css/$1"
+      "dest": "/public/css/$1",
+      "headers": {
+        "Content-Security-Policy": "frame-ancestors 'self' https://*.hubspot.com https://*.hsforms.com",
+        "X-Frame-Options": "ALLOW-FROM https://*.hubspot.com"
+      }
     },
     {
       "src": "/images/(.*)",
-      "dest": "/public/images/$1"
+      "dest": "/public/images/$1",
+      "headers": {
+        "Content-Security-Policy": "frame-ancestors 'self' https://*.hubspot.com https://*.hsforms.com",
+        "X-Frame-Options": "ALLOW-FROM https://*.hubspot.com"
+      }
     },
     {
       "src": "/(.*)",
-      "dest": "/server.js"
+      "dest": "/server.js",
+      "headers": {
+        "Content-Security-Policy": "frame-ancestors 'self' https://*.hubspot.com https://*.hsforms.com",
+        "X-Frame-Options": "ALLOW-FROM https://*.hubspot.com"
+      }
     }
   ]
 }
