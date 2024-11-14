@@ -6,67 +6,10 @@ require('dotenv').config();
 
 const app = express();
 
-// Configure Helmet with custom CSP
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        frameAncestors: ["'self'", "https://*.hubspot.com", "https://app.hubspot.com"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https:", "http:"],
-        connectSrc: ["'self'", "https:", "http:"],
-      },
-    },
-    frameguard: false, // Disable frameguard as we'll set it manually
-  })
-);
-
-// Custom middleware for frame-ancestors
-app.use((req, res, next) => {
-  res.setHeader(
-    'Content-Security-Policy',
-    "frame-ancestors 'self' https://*.hubspot.com https://app.hubspot.com"
-  );
-  next();
-});
-
-// CORS configuration
-app.use(cors({
-  origin: function(origin, callback) {
-    const allowedOrigins = [
-      'https://app.hubspot.com',
-      'https://glo-3d.vercel.app',
-      /\.hubspot\.com$/
-    ];
-    
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Check if the origin is allowed
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      if (allowedOrigin instanceof RegExp) {
-        return allowedOrigin.test(origin);
-      }
-      return allowedOrigin === origin;
-    });
-    
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS not allowed'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-}));
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
