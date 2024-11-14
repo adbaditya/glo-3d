@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const priceSortSelect = document.querySelector('select[name="price_sort"]');
     const priceRangeSelect = document.querySelector('select[name="price_range"]');
 
+
     // Store all initial options
     const allModels = modelSelect ? Array.from(modelSelect.options).map(opt => ({
         value: opt.value,
@@ -286,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function handleFilterSubmit(e) {
+    /*function handleFilterSubmit(e) {
         e.preventDefault();
 
         // Get all car elements
@@ -351,6 +352,88 @@ document.addEventListener('DOMContentLoaded', function () {
         const formData = new FormData(this);
         const params = new URLSearchParams(formData);
         window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }*/
+
+    async function handleFilterSubmit() {
+        try {
+            const formData = new FormData(document.getElementById('filterForm'));
+            const params = new URLSearchParams();
+
+            // Add each form value to params
+            formData.forEach((value, key) => {
+                if (value) params.append(key, value);
+            });
+
+            console.log('Sending request with params:', params.toString());
+
+            const response = await fetch(`/api/inventory/search?${params.toString()}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Received data:', data);
+
+            // Apply price filters
+            let filteredData = data;
+            if (priceRangeSelect?.value) {
+                filteredData = filterByPrice(filteredData, priceRangeSelect.value);
+            }
+            if (priceSortSelect?.value) {
+                filteredData = sortByPrice(filteredData, priceSortSelect.value);
+            }
+
+            updateCarGrid(filteredData);
+            updateNoResultsMessage(filteredData.length);
+
+        } catch (error) {
+            console.error('Error in handleFilterSubmit:', error);
+        }
+    }
+
+    function updateCarGrid(inventory) {
+        const carGrid = document.querySelector('.car-grid');
+        if (!carGrid) return;
+
+        carGrid.innerHTML = inventory.map(car => `
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <img src="${car.thumb || ''}" 
+                         alt="${car.fields?.year || ''} ${car.fields?.make || ''} ${car.fields?.model || ''}"
+                         class="w-full h-48 object-cover">
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold car-name text-center">
+                        ${car.fields?.year || ''} ${car.fields?.make ? car.fields.make.toUpperCase() : ''} ${car.fields?.model || ''}
+                    </h3>
+                    <p class="text-lg font-bold mb-2 text-center">
+                        ${car.fields?.mileage ? parseInt(car.fields.mileage).toLocaleString() : '0'}<span class="text-sm ml-1">Km.</span>
+                        <span class="ml-1">$</span>${car.fields?.price ? parseInt(car.fields.price).toLocaleString() : '0'}
+                    </p>
+                    <p class="text-lg font-bold mb-2 text-center">
+                        <span class="ml-1">Location:</span> ${car.fields?.location}
+                    </p>
+                    <div class="bg-gray-100 p-2 rounded mb-2">
+                        <p class="text-sm">VIN: ${car.vin || 'N/A'}</p>
+                        <p class="text-sm">Stock No: ${car.stock_number || 'N/A'}</p>
+                    </div>
+                    <div class="flex flex-col gap-2 pt-4">
+                        <button 
+                    data-vin="${car.vin || ''}"
+                    data-src="${car.src || ''}"
+                    onclick="handleCarDetails(this)"
+                    class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">
+                    View Details
+                </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    const showCarsButton = document.querySelector('button[type="submit"]');
+    if (showCarsButton) {
+        showCarsButton.addEventListener('click', handleFilterSubmit);
     }
 
     function handleFilterReset() {
@@ -438,29 +521,37 @@ document.addEventListener('DOMContentLoaded', function () {
     ];
 
     // Set up global handlers
-    window.handleCarDetails = function (button) {
+    window.handleCarDetails = async function(button) {
         try {
+            const vin = button.dataset.vin;
             const src = button.dataset.src;
-            const fields = JSON.parse(button.dataset.fields);
-            console.log('Fields String:', fields); // Log the JSON string
             
-
-            if (!src || !fields) {
-                throw new Error('Missing required data attributes');
+            if (!vin || !src) {
+                throw new Error('Missing VIN or source URL');
             }
-
+    
+            // Fetch car details from API
+            const response = await fetch(`/api/inventory/car/${vin}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch car details');
+            }
+            
+            const carData = await response.json();
+            
+            // Process the fields
+            const fields = {
+                ...carData.fields,
+                features: carData.features,
+                '1729543266746': carData.fields['1729543266746'], // Carfax URL
+                '1729543306380': carData.fields['1729543306380']  // Inspection Status
+            };
+    
             showCarDetails(src, fields);
+            
         } catch (error) {
             console.error('Error in handleCarDetails:', error);
             console.log('Error loading car details. Please try again.');
         }
-    };
-
-    window.closeModal = function () {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        iframeContainer.innerHTML = '';
-        vehicleInfoContainer.innerHTML = '';
     };
 
     // Add event listeners
@@ -470,11 +561,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (makeSelect) {
         makeSelect.addEventListener('change', handleMakeChange);
-    }
-
-    const filterForm = document.getElementById('filterForm');
-    if (filterForm) {
-        filterForm.addEventListener('submit', handleFilterSubmit);
     }
 });
 

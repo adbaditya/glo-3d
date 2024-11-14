@@ -4,7 +4,7 @@
     <div class="container mx-auto px-4 py-8">
         <!-- Filters section -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8 filter">
-            <form id="filterForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form id="filterForm" class="grid grid-cols-1 md:grid-cols-3 gap-4" onsubmit="return false;">
                 <!-- First Row -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
@@ -73,7 +73,7 @@
 
                 <!-- Button Row -->
                 <div class="md:col-span-3 flex justify-center mt-4">
-                    <button type="submit"
+                    <button type="button" id="showCarsButton"
                         class="bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700 transition-colors">
                         Show Cars
                     </button>
@@ -230,5 +230,148 @@
             </div>
         </div>
 
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Get references to form and button
+                const filterForm = document.getElementById('filterForm');
+                const showCarsButton = document.getElementById('showCarsButton');
+                const resetFilters = document.getElementById('resetFilters');
 
+                // Add click event listener to the Show Cars button
+                if (showCarsButton) {
+                    showCarsButton.addEventListener('click', async (e) => {
+                        e.preventDefault();
+
+                        // Get all form values
+                        const year = filterForm.querySelector('[name="year"]').value;
+                        const make = filterForm.querySelector('[name="make"]').value;
+                        const model = filterForm.querySelector('[name="model"]').value;
+                        const location = filterForm.querySelector('[name="location"]').value;
+                        const priceSort = filterForm.querySelector('[name="price_sort"]').value;
+                        const priceRange = filterForm.querySelector('[name="price_range"]').value;
+
+                        // Log the values to verify they're being captured
+                        console.log('Filter values:', { year, make, model, location, priceSort, priceRange });
+
+                        try {
+                            // Build query string
+                            const params = new URLSearchParams();
+                            if (year) params.append('year', year);
+                            if (make) params.append('make', make);
+                            if (model) params.append('model', model);
+                            if (location) params.append('location', location);
+                            if (priceSort) params.append('price_sort', priceSort);
+                            if (priceRange) params.append('price_range', priceRange);
+
+                            // Make the API call
+                            const response = await fetch(`/api/inventory/search?${params.toString()}`);
+                            let data = await response.json();
+
+                            if (priceRange) {
+                                data = data.filter(car => {
+                                    const price = parseFloat(car.fields?.price) || 0;
+                                    switch (priceRange) {
+                                        case '0-15000':
+                                            return price <= 15000;
+                                        case '15000-30000':
+                                            return price > 15000 && price <= 30000;
+                                        case '30000-50000':
+                                            return price > 30000 && price <= 50000;
+                                        case '50000+':
+                                            return price > 50000;
+                                        default:
+                                            return true;
+                                    }
+                                });
+                            }
+
+                            // Apply price sorting
+                            if (priceSort) {
+                                data.sort((a, b) => {
+                                    const priceA = parseFloat(a.fields?.price) || 0;
+                                    const priceB = parseFloat(b.fields?.price) || 0;
+                                    return priceSort === 'asc' ? priceA - priceB : priceB - priceA;
+                                });
+                            }
+
+                            // Update the car grid with new data
+                            updateCarGrid(data);
+                            updateNoResultsMessage(data.length);
+
+                        } catch (error) {
+                            console.error('Error fetching data:', error);
+                        }
+                    });
+                }
+
+                // Add click event listener to the Reset button
+                if (resetFilters) {
+                    resetFilters.addEventListener('click', () => {
+                        filterForm.reset();
+                        // Optionally fetch all cars again after reset
+                        showCarsButton.click();
+                    });
+                }
+
+                // Function to update car grid with new data
+                function updateCarGrid(inventory) {
+                    const carGrid = document.querySelector('.car-grid');
+                    if (!carGrid) return;
+
+                    carGrid.innerHTML = inventory.map(car => `
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <img src="${car.thumb || ''}" 
+                         alt="${car.fields?.year || ''} ${car.fields?.make || ''} ${car.fields?.model || ''}"
+                         class="w-full h-48 object-cover">
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold car-name text-center">
+                        ${car.fields?.year || ''} ${car.fields?.make ? car.fields.make.toUpperCase() : ''} ${car.fields?.model || ''}
+                    </h3>
+                    <p class="text-lg font-bold mb-2 text-center">
+                        ${car.fields?.mileage ? parseInt(car.fields.mileage).toLocaleString() : '0'}<span class="text-sm ml-1">Km.</span>
+                        <span class="ml-1">$</span>${car.fields?.price ? parseInt(car.fields.price).toLocaleString() : '0'}
+                    </p>
+                    <p class="text-lg font-bold mb-2 text-center">
+                        <span class="ml-1">Location:</span> ${car.fields?.location}
+                    </p>
+                    <div class="bg-gray-100 p-2 rounded mb-2">
+                        <p class="text-sm">VIN: ${car.vin || 'N/A'}</p>
+                        <p class="text-sm">Stock No: ${car.stock_number || 'N/A'}</p>
+                    </div>
+                    <div class="flex flex-col gap-2 pt-4">
+                        <button 
+                    data-vin="${car.vin || ''}"
+                    data-src="${car.src || ''}"
+                    onclick="handleCarDetails(this)"
+                    class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">
+                    View Details
+                </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+                }
+
+                // Function to update no results message
+                function updateNoResultsMessage(count) {
+                    const existingMessage = document.querySelector('.no-results-message');
+                    if (existingMessage) {
+                        existingMessage.remove();
+                    }
+
+                    if (count === 0) {
+                        const carGrid = document.querySelector('.car-grid');
+                        const message = document.createElement('div');
+                        message.className = 'no-results-message col-span-full py-8 text-center text-gray-500';
+                        message.innerHTML = `
+                <div class="text-xl font-semibold mb-2">No cars match your filters</div>
+                <div class="text-sm">Try adjusting your filters or <button class="text-blue-500 hover:underline" onclick="document.getElementById('resetFilters').click()">reset all filters</button></div>
+            `;
+                        carGrid.appendChild(message);
+                    }
+                }
+            });
+        </script>
         <%- include('partials/footer') %>

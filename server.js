@@ -25,12 +25,12 @@ class Cache {
   get(key) {
     const item = this.cache.get(key);
     if (!item) return null;
-    
+
     if (Date.now() > item.expiry) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return item.value;
   }
 
@@ -63,7 +63,7 @@ const glo3dApi = axios.create({
 async function fetchInventoryData(filters) {
   const cacheKey = JSON.stringify(filters);
   const cachedData = inventoryCache.get(cacheKey);
-  
+
   if (cachedData) {
     console.log('Serving from cache');
     return cachedData;
@@ -73,7 +73,7 @@ async function fetchInventoryData(filters) {
   const response = await glo3dApi.post('?=application/json&', {}, {
     params: filters
   });
-  
+
   const data = response.data;
   inventoryCache.set(cacheKey, data);
   return data;
@@ -96,9 +96,9 @@ app.get('/', async (req, res) => {
     inventory = inventory.filter(item => {
       const fields = item.fields || {};
       return (!filters.make || fields.make === filters.make) &&
-             (!filters.model || fields.model === filters.model) &&
-             (!filters.year || fields.year === filters.year) &&
-             (!filters.location || fields.location === filters.location);
+        (!filters.model || fields.model === filters.model) &&
+        (!filters.year || fields.year === filters.year) &&
+        (!filters.location || fields.location === filters.location);
     });
 
     // Get unique values for filters
@@ -139,9 +139,9 @@ app.get('/main-grid', async (req, res) => {
     inventory = inventory.filter(item => {
       const fields = item.fields || {};
       return (!filters.make || fields.make === filters.make) &&
-             (!filters.model || fields.model === filters.model) &&
-             (!filters.year || fields.year === filters.year) &&
-             (!filters.location || fields.location === filters.location);
+        (!filters.model || fields.model === filters.model) &&
+        (!filters.year || fields.year === filters.year) &&
+        (!filters.location || fields.location === filters.location);
     });
 
     // Get unique values for filters
@@ -249,26 +249,47 @@ app.post('/api/clear-cache', (req, res) => {
 
 app.get('/api/inventory/search', async (req, res) => {
   try {
-      const { search, limit = 25 } = req.query;
-      
-      // Get data from cache or API
-      const data = await fetchInventoryData({});
-      let inventory = data.data || [];
-      
-      // Apply search filter
-      if (search) {
-          inventory = inventory.filter(item => {
-              const searchString = `${item.fields?.make} ${item.fields?.model} ${item.vin} ${item.fields?.year} ${item.fields?.trim} ${item.fields?.location} ${item.stock_number}`.toLowerCase();
-              return searchString.includes(search.toLowerCase());
-          });
-      }
+    const { make, model, year, location, price_sort, price_range, search, limit = 25 } = req.query;
 
-      // Apply limit
-      inventory = inventory.slice(0, parseInt(limit));
-      
-      res.json(inventory);
+    const data = await fetchInventoryData({});
+    let inventory = data.data || [];
+
+    // Apply filters
+    inventory = inventory.filter(item => {
+      const fields = item.fields || {};
+      return (!make || fields.make === make) &&
+        (!model || fields.model === model) &&
+        (!year || fields.year === year) &&
+        (!location || fields.location === location);
+    });
+
+    if (search) {
+      inventory = inventory.filter(item => {
+        const searchString = `${item.fields?.make} ${item.fields?.model} ${item.vin} ${item.fields?.year} ${item.fields?.trim} ${item.fields?.location} ${item.stock_number}`.toLowerCase();
+        return searchString.includes(search.toLowerCase());
+      });
+    }
+
+    res.json(inventory);
   } catch (error) {
-      console.error('Search error:', error);
+    console.error('Search error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/inventory/car/:vin', async (req, res) => {
+  try {
+      const { vin } = req.params;
+      const data = await fetchInventoryData({});
+      const car = data.data.find(item => item.vin === vin);
+      
+      if (!car) {
+          return res.status(404).json({ error: 'Car not found' });
+      }
+      
+      res.json(car);
+  } catch (error) {
+      console.error('Error fetching car details:', error);
       res.status(500).json({ error: error.message });
   }
 });
