@@ -173,7 +173,6 @@ app.get('/car-details', async (req, res) => {
           return res.status(404).send('Car not found');
       }
 
-      // Render a standalone car details page
       res.render('car-details', { car });
   } catch (error) {
       console.error('Error:', error);

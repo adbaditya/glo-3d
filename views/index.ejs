@@ -1,88 +1,77 @@
-<!-- views/index.ejs -->
+<!-- views/main-grid.ejs -->
 <%- include('partials/header') %>
 
     <div class="container mx-auto px-4 py-8">
         <!-- Filters section -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8 filter">
-            <form id="filterForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- First Row -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                    <select name="year" class="w-full border border-gray-300 rounded-md p-2">
-                        <option value="">All Years</option>
-                        <% filters.years.sort().reverse().forEach(year=> { %>
-                            <option value="<%= year %>" <%=selectedFilters.year===year ? 'selected' : '' %>>
-                                <%= year %>
-                            </option>
-                            <% }) %>
-                    </select>
+        <!-- Replace your current filter form with this -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Year Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                <div class="flex flex-wrap gap-2 border border-gray-300 rounded-md p-2">
+                    <a href="#"
+                        class="filter-link text-sm px-3 py-1 rounded-md <%= !selectedFilters.year ? 'bg-blue-600 text-white' : 'bg-gray-100' %>"
+                        data-filter-type="year" data-filter-value="">All Years</a>
+                    <% filters.years.sort().reverse().forEach(year=> { %>
+                        <a href="#"
+                            class="filter-link text-sm px-3 py-1 rounded-md <%= selectedFilters.year === year ? 'bg-blue-600 text-white' : 'bg-gray-100' %>"
+                            data-filter-type="year" data-filter-value="<%= year %>">
+                            <%= year %>
+                        </a>
+                        <% }); %>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Make</label>
-                    <select name="make" class="w-full border border-gray-300 rounded-md p-2">
-                        <option value="">All Makes</option>
-                        <% filters.makes.sort().forEach(make=> { %>
-                            <option value="<%= make %>" <%=selectedFilters.make===make ? 'selected' : '' %>>
-                                <%= make %>
-                            </option>
-                            <% }) %>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
-                    <select name="model" class="w-full border border-gray-300 rounded-md p-2">
-                        <option value="">All Models</option>
-                        <% filters.models.sort().forEach(model=> { %>
-                            <option value="<%= model %>" <%=selectedFilters.model===model ? 'selected' : '' %>>
-                                <%= model %>
-                            </option>
-                            <% }) %>
-                    </select>
-                </div>
+            </div>
 
-                <!-- Second Row -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                    <select name="location" class="w-full border border-gray-300 rounded-md p-2">
-                        <option value="">All Locations</option>
-                        <% filters.locations.sort().forEach(location=> { %>
-                            <option value="<%= location %>" <%=selectedFilters.location===location ? 'selected' : '' %>>
-                                <%= location %>
-                            </option>
-                            <% }) %>
-                    </select>
+            <!-- Make Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Make</label>
+                <div class="flex flex-wrap gap-2 border border-gray-300 rounded-md p-2">
+                    <a href="#"
+                        class="filter-link text-sm px-3 py-1 rounded-md <%= !selectedFilters.make ? 'bg-blue-600 text-white' : 'bg-gray-100' %>"
+                        data-filter-type="make" data-filter-value="">All Makes</a>
+                    <% filters.makes.sort().forEach(make=> { %>
+                        <a href="#"
+                            class="filter-link text-sm px-3 py-1 rounded-md <%= selectedFilters.make === make ? 'bg-blue-600 text-white' : 'bg-gray-100' %>"
+                            data-filter-type="make" data-filter-value="<%= make %>">
+                            <%= make %>
+                        </a>
+                        <% }); %>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Price Sort</label>
-                    <select name="price_sort" class="w-full border border-gray-300 rounded-md p-2">
-                        <option value="">Default</option>
-                        <option value="asc">Price: Low to High</option>
-                        <option value="desc">Price: High to Low</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
-                    <select name="price_range" class="w-full border border-gray-300 rounded-md p-2">
-                        <option value="">All Prices</option>
-                        <option value="0-15000">Under $15,000</option>
-                        <option value="15000-30000">$15,000 - $30,000</option>
-                        <option value="30000-50000">$30,000 - $50,000</option>
-                        <option value="50000+">Above $50,000</option>
-                    </select>
-                </div>
+            </div>
 
-                <!-- Button Row -->
-                <div class="md:col-span-3 flex justify-center mt-4">
-                    <button type="submit"
-                        class="bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                        Show Cars
-                    </button>
-                    <button type="button" id="resetFilters"
-                        class="bg-gray-500 text-white ml-5 px-8 py-2 rounded-md hover:bg-gray-600 transition-colors">
-                        Reset Filters
-                    </button>
+            <!-- Model Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                <div class="flex flex-wrap gap-2 border border-gray-300 rounded-md p-2">
+                    <a href="#"
+                        class="filter-link text-sm px-3 py-1 rounded-md <%= !selectedFilters.model ? 'bg-blue-600 text-white' : 'bg-gray-100' %>"
+                        data-filter-type="model" data-filter-value="">All Models</a>
+                    <% filters.models.sort().forEach(model=> { %>
+                        <a href="#"
+                            class="filter-link text-sm px-3 py-1 rounded-md <%= selectedFilters.model === model ? 'bg-blue-600 text-white' : 'bg-gray-100' %>"
+                            data-filter-type="model" data-filter-value="<%= model %>">
+                            <%= model %>
+                        </a>
+                        <% }); %>
                 </div>
-            </form>
+            </div>
+
+            <!-- Location Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <div class="flex flex-wrap gap-2 border border-gray-300 rounded-md p-2">
+                    <a href="#"
+                        class="filter-link text-sm px-3 py-1 rounded-md <%= !selectedFilters.location ? 'bg-blue-600 text-white' : 'bg-gray-100' %>"
+                        data-filter-type="location" data-filter-value="">All Locations</a>
+                    <% filters.locations.sort().forEach(location=> { %>
+                        <a href="#"
+                            class="filter-link text-sm px-3 py-1 rounded-md <%= selectedFilters.location === location ? 'bg-blue-600 text-white' : 'bg-gray-100' %>"
+                            data-filter-type="location" data-filter-value="<%= location %>">
+                            <%= location %>
+                        </a>
+                        <% }); %>
+                </div>
+            </div>
         </div>
 
         <!-- Inventory Grid -->
@@ -135,10 +124,10 @@
 
                         <!-- Action Buttons -->
                         <div class="flex flex-col gap-2 pt-4">
-                            <button data-src="<%= car.src %>"
-                                data-fields="<%= JSON.stringify({...car.fields, features: car.features}) %>"
-                                onclick="handleCarDetails(this)"
-                                class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">
+                            <button 
+                                class="car-detail-button w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center"
+                                data-car-id="<%= car.id %>"
+                                data-car-src="<%= car.src %>">
                                 View Details
                             </button>
                         </div>
