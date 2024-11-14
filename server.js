@@ -247,6 +247,32 @@ app.post('/api/clear-cache', (req, res) => {
   res.json({ success: true, message: 'Cache cleared successfully' });
 });
 
+app.get('/api/inventory/search', async (req, res) => {
+  try {
+      const { search, limit = 25 } = req.query;
+      
+      // Get data from cache or API
+      const data = await fetchInventoryData({});
+      let inventory = data.data || [];
+      
+      // Apply search filter
+      if (search) {
+          inventory = inventory.filter(item => {
+              const searchString = `${item.fields?.make} ${item.fields?.model} ${item.vin} ${item.fields?.year} ${item.fields?.trim} ${item.fields?.location} ${item.stock_number}`.toLowerCase();
+              return searchString.includes(search.toLowerCase());
+          });
+      }
+
+      // Apply limit
+      inventory = inventory.slice(0, parseInt(limit));
+      
+      res.json(inventory);
+  } catch (error) {
+      console.error('Search error:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

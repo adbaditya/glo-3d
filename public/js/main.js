@@ -20,51 +20,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const priceSortSelect = document.querySelector('select[name="price_sort"]');
     const priceRangeSelect = document.querySelector('select[name="price_range"]');
 
-    const searchForm = document.getElementById('searchForm');
-    const searchInput = document.getElementById('searchInput');
-    const resetButton2 = document.getElementById('resetSearch');
-
-    // Handle form submission
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const searchValue = searchInput.value.trim();
-            if (searchValue) {
-                this.submit(); // Submit the form if there's a search value
-            }
-        });
-    }
-
-    // Handle enter key
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                searchForm.submit();
-            }
-        });
-    }
-
-    // Handle reset button
-    if (resetButton2) {
-        resetButton2.addEventListener('click', function() {
-            searchInput.value = '';
-            resetButton2.style.display = 'none';
-            // Redirect to the base inventory URL without parameters
-            window.location.href = '/inventory-table';
-        });
-
-        // Show/hide reset button based on input
-        searchInput.addEventListener('input', function() {
-            resetButton2.style.display = this.value.trim() ? 'block' : 'none';
-        });
-
-        // Show reset button on load if there's a value
-        if (searchInput.value.trim()) {
-            resetButton2.style.display = 'block';
-        }
-    }
-
     // Store all initial options
     const allModels = modelSelect ? Array.from(modelSelect.options).map(opt => ({
         value: opt.value,

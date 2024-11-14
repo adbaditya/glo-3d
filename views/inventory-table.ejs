@@ -14,31 +14,32 @@
         <h1 class="text-3xl font-bold mb-6">Inventory Management</h1>
 
         <!-- Search and Filters -->
+        <!-- Modified search container -->
         <div class="bg-white p-4 rounded-lg shadow mb-6">
-            <form id="searchForm" action="/inventory-table" method="GET" class="flex flex-wrap gap-4">
-                <div class="flex-1 min-w-[200px] relative">
-                    <input 
-                        type="text" 
-                        id="searchInput" 
-                        name="search"
-                        value="<%= search %>" 
-                        placeholder="Search inventory..." 
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                    <button 
-                        type="button"
-                        id="resetSearch" 
-                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        style="display: none;"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-                <!-- Hidden input for limit -->
-                <input type="hidden" name="limit" value="100">
-            </form>
+            <div class="flex flex-wrap gap-4" id="searchContainer">
+                <form id="searchForm" class="flex flex-wrap gap-4">
+                    <div class="flex-1 min-w-[200px] relative">
+                        <input type="text" name="search" id="searchInput" value="<%= search %>"
+                            placeholder="Search inventory..."
+                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select name="limit">
+                            <option value="25">25 per page</option>
+                            <option value="50">50 per page</option>
+                            <option value="100">100 per page</option>
+                        </select>
+                        <button type="button" id="resetSearch"
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            style="display: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Table -->
@@ -148,15 +149,93 @@
     </div>
 
     <script>
-        // Add any client-side JavaScript here
+        // Add this script at the bottom of your inventory-table.ejs, just before </body>
         document.addEventListener('DOMContentLoaded', function () {
-            // Example: Add sort functionality
-            const tableHeaders = document.querySelectorAll('th');
-            tableHeaders.forEach(header => {
-                header.style.cursor = 'pointer';
-                header.addEventListener('click', () => {
-                    // Add sorting logic here
+            const searchInput = document.querySelector('input[name="search"]');
+            const limitSelect = document.querySelector('select[name="limit"]');
+            const inventoryTable = document.querySelector('tbody');
+            const searchForm = document.querySelector('form');
+
+            if (!searchInput || !limitSelect || !inventoryTable || !searchForm) {
+                console.error('Required elements not found');
+                return;
+            }
+
+            function updateTableContent(data) {
+                inventoryTable.innerHTML = data.map(item => `
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${item.fields?.year || 'N/A'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${item.fields?.make || 'N/A'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    ${item.fields?.model || 'N/A'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${item.fields?.trim || 'N/A'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${item.fields?.mileage ? Number(item.fields.mileage).toLocaleString() : 'N/A'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${item.vin || 'N/A'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${item.fields?.location || 'N/A'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${item.stock_number || 'N/A'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span class="text-sm ml-1">$</span>${item.fields?.price || '0'}
+                </td>
+            </tr>
+        `).join('');
+            }
+
+            const performSearch = async () => {
+                const searchValue = searchInput.value;
+                const limitValue = limitSelect.value;
+
+                try {
+                    const response = await fetch(`/api/inventory/search?search=${encodeURIComponent(searchValue)}&limit=${limitValue}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Search failed');
+
+                    const data = await response.json();
+                    updateTableContent(data);
+                } catch (error) {
+                    console.error('Search error:', error);
+                }
+            };
+
+            const resetButton = document.getElementById('resetSearch');
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    searchInput.value = '';
+                    limitSelect.value = '25';
+                    performSearch();
                 });
+            }
+
+            // Show/hide reset button based on search input
+            searchInput.addEventListener('input', () => {
+                resetButton.style.display = searchInput.value ? 'block' : 'none';
+            });
+
+            // Event listeners
+            searchInput.addEventListener('input', performSearch);
+            limitSelect.addEventListener('change', performSearch);
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                performSearch();
             });
         });
     </script>
