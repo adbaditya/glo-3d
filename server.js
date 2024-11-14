@@ -6,10 +6,48 @@ require('dotenv').config();
 
 const app = express();
 
+// Updated CORS and security headers configuration
+app.use((req, res, next) => {
+  // Set CSP header to allow framing from HubSpot domains
+  res.header(
+    'Content-Security-Policy',
+    "frame-ancestors 'self' https://*.hubspot.com https://*.hsforms.com"
+  );
+  
+  // Set X-Frame-Options to allow HubSpot
+  res.header('X-Frame-Options', 'ALLOW-FROM https://*.hubspot.com');
+  
+  // Standard security headers
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', true);
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// CORS middleware with specific configuration for HubSpot
+app.use(cors({
+  origin: [
+    'https://app.hubspot.com',
+    'https://glo-3d.vercel.app',
+    'http://localhost:3000',
+    /\.hubspot\.com$/,  // Allow all HubSpot subdomains
+    /\.hsforms\.com$/   // Allow HubSpot form domains
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+  maxAge: 86400
+}));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware
-app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
