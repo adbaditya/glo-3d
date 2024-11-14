@@ -20,6 +20,83 @@ document.addEventListener('DOMContentLoaded', function () {
     const priceSortSelect = document.querySelector('select[name="price_sort"]');
     const priceRangeSelect = document.querySelector('select[name="price_range"]');
 
+
+    //invenotry table form
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const limitSelect = document.getElementById('limitSelect');
+    const applyButton = document.getElementById('applySearch');
+
+    if (applyButton) {
+        applyButton.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Get current values
+            const searchValue = searchInput.value;
+            const limitValue = limitSelect.value;
+
+            // Get all car elements
+            const carGrid = document.querySelector('.car-grid');
+            if (!carGrid) return;
+
+            const carElements = Array.from(carGrid.children);
+            let visibleCars = 0;
+
+            // Filter cars based on search
+            carElements.forEach(carElement => {
+                if (carElement.classList.contains('no-results-message')) return;
+
+                const fieldsElement = carElement.querySelector('[data-fields]');
+                if (!fieldsElement) return;
+
+                try {
+                    const fields = JSON.parse(fieldsElement.dataset.fields);
+                    let showCar = true;
+
+                    // Simple search implementation
+                    if (searchValue) {
+                        const searchLower = searchValue.toLowerCase();
+                        const searchableText = `${fields.year} ${fields.make} ${fields.model} ${fields.trim}`.toLowerCase();
+
+                        if (!searchableText.includes(searchLower)) {
+                            showCar = false;
+                        }
+                    }
+
+                    // Show/hide car based on search
+                    carElement.style.display = showCar ? '' : 'none';
+                    if (showCar) visibleCars++;
+
+                } catch (error) {
+                    console.error('Error filtering car:', error);
+                }
+            });
+
+            // Update results message
+            updateNoResultsMessage(visibleCars);
+
+            // Update URL without page reload
+            const params = new URLSearchParams();
+            if (searchValue) params.set('search', searchValue);
+            if (limitValue) params.set('limit', limitValue);
+
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            window.history.pushState({}, '', newUrl);
+
+            // Optional: Notify parent frame (HubSpot) of the search
+            try {
+                window.parent.postMessage({
+                    type: 'inventorySearch',
+                    search: searchValue,
+                    limit: limitValue,
+                    results: visibleCars
+                }, '*');
+            } catch (error) {
+                console.error('Error posting message to parent:', error);
+            }
+        });
+    }
+
     // Store all initial options
     const allModels = modelSelect ? Array.from(modelSelect.options).map(opt => ({
         value: opt.value,
@@ -383,20 +460,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateNoResultsMessage(visibleCars) {
-        // Remove existing message if it exists
         const existingMessage = document.querySelector('.no-results-message');
         if (existingMessage) {
             existingMessage.remove();
         }
-
-        // If no visible cars, show message
+    
         if (visibleCars === 0) {
             const carGrid = document.querySelector('.car-grid');
             const message = document.createElement('div');
             message.className = 'no-results-message col-span-full py-8 text-center text-gray-500';
             message.innerHTML = `
-                <div class="text-xl font-semibold mb-2">No cars match your filters</div>
-                <div class="text-sm">Try adjusting your filters or <button class="text-blue-500 hover:underline" onclick="document.getElementById('resetFilters').click()">reset all filters</button></div>
+                <div class="text-xl font-semibold mb-2">No cars match your search</div>
+                <div class="text-sm">Try adjusting your search terms</div>
             `;
             carGrid.appendChild(message);
         }
@@ -443,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const src = button.dataset.src;
             const fields = JSON.parse(button.dataset.fields);
             console.log('Fields String:', fields); // Log the JSON string
-            
+
 
             if (!src || !fields) {
                 throw new Error('Missing required data attributes');
