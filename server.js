@@ -14,6 +14,12 @@ app.use(cors({
   credentials: true
 }));
 
+// Example in Express.js
+app.use((req, res, next) => {
+  res.header('Content-Security-Policy', "frame-ancestors 'self' https://*.hubspot.com");
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware
