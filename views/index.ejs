@@ -372,6 +372,32 @@
                         carGrid.appendChild(message);
                     }
                 }
+
+                function closeModal() {
+                    const modal = document.getElementById('carModal');
+                    const carfaxLink = document.getElementById('carfaxLink');
+
+                    // Reset modal
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+
+                    // Clear containers
+                    iframeContainer.innerHTML = '';
+                    vehicleInfoContainer.innerHTML = '';
+
+                    // Reset Carfax button
+                    carfaxLink.classList.remove('opacity-50', 'cursor-not-allowed');
+                    carfaxLink.textContent = 'View Carfax Report';
+                    carfaxLink.href = '#';
+
+                    inspectionLink.classList.remove('opacity-50', 'cursor-not-allowed');
+                    inspectionLink.textContent = 'View Inspection Report';
+                    inspectionLink.href = '#';
+                }
+
+                modal.addEventListener('click', function (e) {
+                    if (e.target === this) closeModal();
+                });
             });
         </script>
         <%- include('partials/footer') %>

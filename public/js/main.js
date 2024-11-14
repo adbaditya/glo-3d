@@ -94,17 +94,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Set iframe content
             iframeContainer.innerHTML = `
-                <iframe 
-                    src="${src}"
-                    allow="fullscreen" 
-                    allowfullscreen="true" 
-                    loading="lazy"
-                    width="100%" 
-                    height="100%" 
-                    frameborder="0" 
-                    scrolling="no"
-                ></iframe>
-            `;
+            <iframe 
+                src="${src}"
+                allow="fullscreen" 
+                allowfullscreen="true" 
+                loading="lazy"
+                width="100%" 
+                height="100%" 
+                frameborder="0" 
+                scrolling="no"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
+            ></iframe>
+        `;
 
             // Update vehicle info
             updateVehicleInfo(fields);
@@ -521,23 +522,23 @@ document.addEventListener('DOMContentLoaded', function () {
     ];
 
     // Set up global handlers
-    window.handleCarDetails = async function(button) {
+    window.handleCarDetails = async function (button) {
         try {
             const vin = button.dataset.vin;
             const src = button.dataset.src;
-            
+
             if (!vin || !src) {
                 throw new Error('Missing VIN or source URL');
             }
-    
+
             // Fetch car details from API
             const response = await fetch(`/api/inventory/car/${vin}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch car details');
             }
-            
+
             const carData = await response.json();
-            
+
             // Process the fields
             const fields = {
                 ...carData.fields,
@@ -545,9 +546,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 '1729543266746': carData.fields['1729543266746'], // Carfax URL
                 '1729543306380': carData.fields['1729543306380']  // Inspection Status
             };
-    
+
             showCarDetails(src, fields);
-            
+
         } catch (error) {
             console.error('Error in handleCarDetails:', error);
             console.log('Error loading car details. Please try again.');
