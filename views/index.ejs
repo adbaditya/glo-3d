@@ -136,7 +136,7 @@
                         <!-- Action Buttons -->
                         <div class="flex flex-col gap-2 pt-4">
                             <button data-src="<%= car.src %>"
-                                data-fields='<%= JSON.stringify({...car.fields, features: car.features}) %>'
+                                data-fields="<%- JSON.stringify({...car.fields, features: car.features}).replace(/"/g, '&quot;') %>"
                                 onclick="handleCarDetails(this)"
                                 class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">
                                 View Details
