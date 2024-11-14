@@ -253,6 +253,77 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+    
+    // Use URL parameters instead of form submission
+    function initializeFilters() {
+        const filterLinks = document.querySelectorAll('.filter-link');
+        filterLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const filterType = link.dataset.filterType;
+                const filterValue = link.dataset.filterValue;
+                
+                // Update URL parameters
+                const params = new URLSearchParams(window.location.search);
+                if (filterValue) {
+                    params.set(filterType, filterValue);
+                } else {
+                    params.delete(filterType);
+                }
+                
+                // Reload page with new parameters
+                window.location.search = params.toString();
+            });
+        });
+    }
+
+    // Handle car details using data attributes and URL parameters
+    function initializeCarDetails() {
+        const detailButtons = document.querySelectorAll('.car-detail-button');
+        detailButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const carId = button.dataset.carId;
+                const modalUrl = `/car-details?id=${carId}`;
+                
+                // Open modal using HubSpot-friendly approach
+                if (window.hsModal) {
+                    window.hsModal.open({
+                        url: modalUrl,
+                        size: 'large'
+                    });
+                } else {
+                    window.open(modalUrl, '_blank');
+                }
+            });
+        });
+    }
+
+    // Server-side rendering helper for filters
+    function renderFilterLink(type, value, label, currentValue) {
+        return `
+            <a href="#" 
+               class="filter-link ${value === currentValue ? 'active' : ''}"
+               data-filter-type="${type}"
+               data-filter-value="${value}">
+                ${label}
+            </a>
+        `;
+    }
+
+    // Server-side rendering helper for car details button
+    function renderCarButton(car) {
+        return `
+            <button 
+                class="car-detail-button w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center"
+                data-car-id="${car.id}">
+                View Details
+            </button>
+        `;
+    }
+
+    // Initialize everything
+    initializeFilters();
+    initializeCarDetails();
 
     // 3. EVENT HANDLERS
     function handleMakeChange() {

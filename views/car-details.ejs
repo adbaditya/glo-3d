@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= car.fields.year %> <%= car.fields.make %> <%= car.fields.model %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Car Viewer -->
+            <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+                <iframe 
+                    src="<%= car.src %>"
+                    allow="fullscreen" 
+                    allowfullscreen="true" 
+                    loading="lazy"
+                    class="w-full h-full"
+                    frameborder="0" 
+                    scrolling="no">
+                </iframe>
+            </div>
+
+            <!-- Car Information -->
+            <div class="p-6">
+                <h1 class="text-2xl font-bold mb-4">
+                    <%= car.fields.year %> <%= car.fields.make %> <%= car.fields.model %>
+                </h1>
+
+                <!-- Basic Info Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <% if (car.fields.price) { %>
+                        <div class="border rounded p-3">
+                            <div class="text-gray-600 text-sm">Price</div>
+                            <div class="font-semibold">$<%= Number(car.fields.price).toLocaleString() %></div>
+                        </div>
+                    <% } %>
+                    
+                    <% if (car.fields.mileage) { %>
+                        <div class="border rounded p-3">
+                            <div class="text-gray-600 text-sm">Mileage</div>
+                            <div class="font-semibold"><%= car.fields.mileage %></div>
+                        </div>
+                    <% } %>
+                    
+                    <% if (car.fields.location) { %>
+                        <div class="border rounded p-3">
+                            <div class="text-gray-600 text-sm">Location</div>
+                            <div class="font-semibold"><%= car.fields.location %></div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Detailed Specs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <% const specs = ['exterior_color', 'interior_color', 'transmission', 'drive_type', 
+                                    'fuel_type', 'engine', 'vin', 'stock_number']; %>
+                    
+                    <% specs.forEach(spec => { %>
+                        <% if (car.fields[spec]) { %>
+                            <div class="border-b py-2">
+                                <div class="text-gray-600 text-sm"><%= spec.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %></div>
+                                <div class="font-medium"><%= car.fields[spec] %></div>
+                            </div>
+                        <% } %>
+                    <% }); %>
+                </div>
+
+                <!-- Features -->
+                <% if (car.features) { %>
+                    <div class="mt-6">
+                        <h2 class="text-xl font-semibold mb-4">Features</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <% Object.entries(car.features).forEach(([category, features]) => { %>
+                                <div>
+                                    <h3 class="font-medium text-gray-700 mb-2"><%= category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %></h3>
+                                    <ul class="list-disc list-inside text-sm text-gray-600">
+                                        <% features.forEach(feature => { %>
+                                            <li><%= feature %></li>
+                                        <% }); %>
+                                    </ul>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                <% } %>
+
+                <!-- External Links -->
+                <div class="flex gap-4 mt-6">
+                    <% if (car.fields['1729543266746']) { %>
+                        <a href="<%= car.fields['1729543266746'] %>" 
+                           target="_blank"
+                           class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                            View Carfax Report
+                        </a>
+                    <% } %>
+                    
+                    <% if (car.fields['1729543306380']) { %>
+                        <a href="<%= car.fields['1729543306380'] %>"
+                           target="_blank"
+                           class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                            View Inspection Report
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

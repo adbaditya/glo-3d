@@ -124,46 +124,60 @@ app.get('/', async (req, res) => {
 });
 
 // Main Grid
+// Modified main route to support URL parameter filtering
 app.get('/main-grid', async (req, res) => {
   try {
-    const filters = {
-      make: req.query.make,
-      model: req.query.model,
-      year: req.query.year,
-      location: req.query.location
-    };
+      const filters = {
+          make: req.query.make,
+          model: req.query.model,
+          year: req.query.year,
+          location: req.query.location
+      };
 
-    const data = await fetchInventoryData({});
-    let inventory = data.data || [];
+      const data = await fetchInventoryData({});
+      let inventory = data.data || [];
 
-    // Apply filters client-side
-    inventory = inventory.filter(item => {
-      const fields = item.fields || {};
-      return (!filters.make || fields.make === filters.make) &&
-             (!filters.model || fields.model === filters.model) &&
-             (!filters.year || fields.year === filters.year) &&
-             (!filters.location || fields.location === filters.location);
-    });
+      // Apply filters
+      inventory = inventory.filter(item => {
+          const fields = item.fields || {};
+          return (!filters.make || fields.make === filters.make) &&
+                 (!filters.model || fields.model === filters.model) &&
+                 (!filters.year || fields.year === filters.year) &&
+                 (!filters.location || fields.location === filters.location);
+      });
 
-    // Get unique values for filters
-    const makes = [...new Set(data.data.map(item => item.fields?.make).filter(Boolean))];
-    const models = [...new Set(data.data.map(item => item.fields?.model).filter(Boolean))];
-    const years = [...new Set(data.data.map(item => item.fields?.year).filter(Boolean))];
-    const locations = [...new Set(data.data.map(item => item.fields?.location).filter(Boolean))];
+      // Get unique values for filters
+      const makes = [...new Set(data.data.map(item => item.fields?.make).filter(Boolean))];
+      const models = [...new Set(data.data.map(item => item.fields?.model).filter(Boolean))];
+      const years = [...new Set(data.data.map(item => item.fields?.year).filter(Boolean))];
+      const locations = [...new Set(data.data.map(item => item.fields?.location).filter(Boolean))];
 
-    res.render('index', {
-      inventory: inventory,
-      filters: { makes, models, years, locations },
-      selectedFilters: filters
-    });
+      res.render('index', {
+          inventory,
+          filters: { makes, models, years, locations },
+          selectedFilters: filters
+      });
   } catch (error) {
-    console.error('Error:', error);
-    res.render('index', {
-      inventory: [],
-      filters: { makes: [], models: [], years: [], locations: [] },
-      selectedFilters: {},
-      error: 'Failed to load inventory'
-    });
+      console.error('Error:', error);
+      res.status(500).send('Error loading inventory');
+  }
+});
+
+app.get('/car-details', async (req, res) => {
+  try {
+      const carId = req.query.id;
+      const data = await fetchInventoryData({});
+      const car = data.data.find(c => c.id === carId);
+      
+      if (!car) {
+          return res.status(404).send('Car not found');
+      }
+
+      // Render a standalone car details page
+      res.render('car-details', { car });
+  } catch (error) {
+      console.error('Error:', error);
+      res.status(500).send('Error loading car details');
   }
 });
 
