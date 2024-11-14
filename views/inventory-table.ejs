@@ -1,39 +1,43 @@
 <!-- views/inventory-table.ejs -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Table</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 p-6">
     <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl font-bold mb-6">Inventory Management</h1>
 
         <!-- Search and Filters -->
         <div class="bg-white p-4 rounded-lg shadow mb-6">
-            <form id="searchForm" class="flex flex-wrap gap-4">
-                <div class="flex-1 min-w-[200px]">
+            <form id="searchForm" action="/inventory-table" method="GET" class="flex flex-wrap gap-4">
+                <div class="flex-1 min-w-[200px] relative">
                     <input 
                         type="text" 
-                        name="search" 
-                        id="searchInput"
-                        value="<%= search %>"
+                        id="searchInput" 
+                        name="search"
+                        value="<%= search %>" 
                         placeholder="Search inventory..." 
                         class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                </div>
-                <div class="flex gap-2">
-                    <select id="limitSelect" name="limit" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="25" <%= pagination.limit === 25 ? 'selected' : '' %>>25 per page</option>
-                        <option value="50" <%= pagination.limit === 50 ? 'selected' : '' %>>50 per page</option>
-                        <option value="100" <%= pagination.limit === 100 ? 'selected' : '' %>>100 per page</option>
-                    </select>
-                    <button type="button" id="applySearch" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Apply
+                    <button 
+                        type="button"
+                        id="resetSearch" 
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        style="display: none;"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
                     </button>
                 </div>
+                <!-- Hidden input for limit -->
+                <input type="hidden" name="limit" value="100">
             </form>
         </div>
 
@@ -72,7 +76,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    <% inventory.forEach(item => { %>
+                    <% inventory.forEach(item=> { %>
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <%= item.fields?.year || 'N/A' %>
@@ -99,19 +103,19 @@
                                 <%= item.stock_number || 'N/A' %>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <span
-                                    class="text-sm ml-1">$</span><%= item.fields.price || '0' %>
+                                <span class="text-sm ml-1">$</span>
+                                <%= item.fields.price || '0' %>
                             </td>
                         </tr>
-                    <% }); %>
+                        <% }); %>
 
-                    <% if (inventory.length === 0) { %>
-                        <tr>
-                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                                No inventory items found
-                            </td>
-                        </tr>
-                    <% } %>
+                            <% if (inventory.length===0) { %>
+                                <tr>
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        No inventory items found
+                                    </td>
+                                </tr>
+                                <% } %>
                 </tbody>
             </table>
         </div>
@@ -120,32 +124,32 @@
         <div class="mt-6 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="text-sm text-gray-700">
-                    Showing <%= Math.min((pagination.current - 1) * pagination.limit + 1, inventory.length) %> 
-                    to <%= Math.min(pagination.current * pagination.limit, inventory.length) %> 
-                    of <%= inventory.length %> results
+                    Showing <%= Math.min((pagination.current - 1) * pagination.limit + 1, inventory.length) %>
+                        to <%= Math.min(pagination.current * pagination.limit, inventory.length) %>
+                            of <%= inventory.length %> results
                 </span>
             </div>
             <div class="flex gap-2">
-                <% if (pagination.current > 1) { %>
-                    <a href="<%= `${pagination.baseUrl}?page=${pagination.current - 1}&limit=${pagination.limit}&search=${search}` %>" 
-                       class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                <% if (pagination.current> 1) { %>
+                    <a href="<%= `${pagination.baseUrl}?page=${pagination.current - 1}&limit=${pagination.limit}&search=${search}` %>"
+                        class="px-4 py-2 border rounded-lg hover:bg-gray-50">
                         Previous
                     </a>
-                <% } %>
-                
-                <% if (pagination.current < pagination.total) { %>
-                    <a href="<%= `${pagination.baseUrl}?page=${pagination.current + 1}&limit=${pagination.limit}&search=${search}` %>"
-                       class="px-4 py-2 border rounded-lg hover:bg-gray-50">
-                        Next
-                    </a>
-                <% } %>
+                    <% } %>
+
+                        <% if (pagination.current < pagination.total) { %>
+                            <a href="<%= `${pagination.baseUrl}?page=${pagination.current + 1}&limit=${pagination.limit}&search=${search}` %>"
+                                class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                                Next
+                            </a>
+                            <% } %>
             </div>
         </div>
     </div>
 
     <script>
         // Add any client-side JavaScript here
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Example: Add sort functionality
             const tableHeaders = document.querySelectorAll('th');
             tableHeaders.forEach(header => {
@@ -157,4 +161,5 @@
         });
     </script>
 </body>
+
 </html>
