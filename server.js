@@ -6,6 +6,29 @@ require('dotenv').config();
 
 const app = express();
 
+// Comprehensive CORS configuration
+app.use(cors({
+  origin: ['https://app.hubspot.com', 'https://glo-3d.vercel.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
+}));
+
+// Set additional security headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', true);
+  
+  // Handle OPTIONS method
+  if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware
@@ -123,81 +146,121 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Main Grid
-// Modified main route to support URL parameter filtering
+// Main route
 app.get('/main-grid', async (req, res) => {
   try {
-      const filters = {
-          make: req.query.make,
-          model: req.query.model,
-          year: req.query.year,
-          location: req.query.location
-      };
+    const filters = {
+      make: req.query.make,
+      model: req.query.model,
+      year: req.query.year,
+      location: req.query.location
+    };
 
-      const data = await fetchInventoryData({});
-      let inventory = data.data || [];
+    const data = await fetchInventoryData({});
+    let inventory = data.data || [];
 
-      // Apply filters
-      inventory = inventory.filter(item => {
-          const fields = item.fields || {};
-          return (!filters.make || fields.make === filters.make) &&
-                 (!filters.model || fields.model === filters.model) &&
-                 (!filters.year || fields.year === filters.year) &&
-                 (!filters.location || fields.location === filters.location);
-      });
+    // Apply filters client-side
+    inventory = inventory.filter(item => {
+      const fields = item.fields || {};
+      return (!filters.make || fields.make === filters.make) &&
+             (!filters.model || fields.model === filters.model) &&
+             (!filters.year || fields.year === filters.year) &&
+             (!filters.location || fields.location === filters.location);
+    });
 
-      // Get unique values for filters
-      const makes = [...new Set(data.data.map(item => item.fields?.make).filter(Boolean))];
-      const models = [...new Set(data.data.map(item => item.fields?.model).filter(Boolean))];
-      const years = [...new Set(data.data.map(item => item.fields?.year).filter(Boolean))];
-      const locations = [...new Set(data.data.map(item => item.fields?.location).filter(Boolean))];
+    // Get unique values for filters
+    const makes = [...new Set(data.data.map(item => item.fields?.make).filter(Boolean))];
+    const models = [...new Set(data.data.map(item => item.fields?.model).filter(Boolean))];
+    const years = [...new Set(data.data.map(item => item.fields?.year).filter(Boolean))];
+    const locations = [...new Set(data.data.map(item => item.fields?.location).filter(Boolean))];
 
-      res.render('index', {
-          inventory,
-          filters: { makes, models, years, locations },
-          selectedFilters: filters
-      });
+    res.render('index', {
+      inventory: inventory,
+      filters: { makes, models, years, locations },
+      selectedFilters: filters
+    });
   } catch (error) {
-      console.error('Error:', error);
-      res.status(500).send('Error loading inventory');
-  }
-});
-
-app.get('/car-details', async (req, res) => {
-  try {
-      const carId = req.query.id;
-      const data = await fetchInventoryData({});
-      const car = data.data.find(c => c.id === carId);
-      
-      if (!car) {
-          return res.status(404).send('Car not found');
-      }
-
-      res.render('car-details', { car });
-  } catch (error) {
-      console.error('Error:', error);
-      res.status(500).send('Error loading car details');
+    console.error('Error:', error);
+    res.render('index', {
+      inventory: [],
+      filters: { makes: [], models: [], years: [], locations: [] },
+      selectedFilters: {},
+      error: 'Failed to load inventory'
+    });
   }
 });
 
 // API route for AJAX requests
 app.get('/api/inventory', async (req, res) => {
   try {
+    // Fetch all inventory data from the API
+    const data = await fetchInventoryData({});
+
+    // Extract filters from the request query
     const filters = {
       make: req.query.make,
       model: req.query.model,
-      year: req.query.year
+      year: req.query.year,
+      location: req.query.location,
+      price_sort: req.query.price_sort,
+      price_range: req.query.price_range
     };
 
-    const data = await fetchInventoryData(filters);
-    res.json(data);
+    console.log('Received filters:', filters);
+
+    // Filter the inventory data based on the received filters
+    let filteredInventory = data.data || [];
+    filteredInventory = filteredInventory.filter(item => {
+      const fields = item.fields || {};
+      const price = parseFloat(fields.price) || 0;
+
+      // Apply make, model, year, and location filters
+      return (!filters.make || fields.make === filters.make) &&
+             (!filters.model || fields.model === filters.model) &&
+             (!filters.year || fields.year === filters.year) &&
+             (!filters.location || fields.location === filters.location) &&
+             isInPriceRange(price, filters.price_range);
+    });
+
+    // Sort the filtered data by price if specified
+    if (filters.price_sort) {
+      filteredInventory.sort((a, b) => {
+        const priceA = parseFloat(a.fields.price) || 0;
+        const priceB = parseFloat(b.fields.price) || 0;
+        return filters.price_sort === 'asc' ? priceA - priceB : priceB - priceA;
+      });
+    }
+
+    console.log('Filtered data count:', filteredInventory.length);
+
+    // Send the filtered data as a response
+    res.json(filteredInventory);
+
   } catch (error) {
+    console.error('Error fetching inventory:', error);
     res.status(500).json({
       success: false,
       error: error.message
     });
   }
 });
+
+function isInPriceRange(price, range) {
+  if (!range) return true;
+
+  switch (range) {
+    case '0-15000':
+      return price <= 15000;
+    case '15000-30000':
+      return price > 15000 && price <= 30000;
+    case '30000-50000':
+      return price > 30000 && price <= 50000;
+    case '50000+':
+      return price > 50000;
+    default:
+      return true;
+  }
+}
 
 app.get('/inventory-table', async (req, res) => {
   try {
