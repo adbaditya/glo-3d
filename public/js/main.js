@@ -287,27 +287,70 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleFilterSubmit(e) {
-        e.preventDefault(); // Prevent the default form submission
+        e.preventDefault();
 
-        const formData = new FormData(e.target); // Get form data
-        const params = new URLSearchParams(formData); // Convert to URL parameters
+        // Get all car elements
+        const carGrid = document.querySelector('.car-grid');
+        if (!carGrid) return;
 
-        // Send an AJAX request to the server
-        fetch(`/api/inventory?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                // Update the car grid with the new data
-                updateCarGrid(data);
-            })
-            .catch(error => {
-                console.error('Error fetching inventory:', error);
+        const carElements = Array.from(carGrid.children);
+        let visibleCars = 0;
+
+        // Sort cars if price sort is selected
+        if (priceSortSelect?.value) {
+            carElements.sort((a, b) => {
+                const priceA = getCarPrice(a.querySelector('[data-fields]'));
+                const priceB = getCarPrice(b.querySelector('[data-fields]'));
+
+                return priceSortSelect.value === 'asc'
+                    ? priceA - priceB
+                    : priceB - priceA;
             });
+
+            // Reorder elements in the DOM
+            carElements.forEach(car => carGrid.appendChild(car));
+        }
+
+        // Filter cars
+        carElements.forEach(carElement => {
+            // Skip the no-results message if it exists
+            if (carElement.classList.contains('no-results-message')) return;
+
+            const fieldsElement = carElement.querySelector('[data-fields]');
+            if (!fieldsElement) return;
+
+            try {
+                const fields = JSON.parse(fieldsElement.dataset.fields);
+                let showCar = true;
+
+                // Apply all filters
+                if (makeSelect?.value && fields.make !== makeSelect.value) showCar = false;
+                if (modelSelect?.value && fields.model !== modelSelect.value) showCar = false;
+                if (yearSelect?.value && fields.year !== yearSelect.value) showCar = false;
+                if (locationSelect?.value && fields.location !== locationSelect.value) showCar = false;
+
+                // Price range filter
+                if (priceRangeSelect?.value) {
+                    const price = parseFloat(fields.price) || 0;
+                    if (!isInPriceRange(price, priceRangeSelect.value)) {
+                        showCar = false;
+                    }
+                }
+
+                // Show/hide car based on filters
+                carElement.style.display = showCar ? '' : 'none';
+                if (showCar) visibleCars++;
+            } catch (error) {
+                console.error('Error filtering car:', error);
+            }
+        });
+
+        updateNoResultsMessage(visibleCars);
+
+        // Update URL with filter parameters
+        const formData = new FormData(this);
+        const params = new URLSearchParams(formData);
+        window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
     }
 
     function handleFilterReset() {
@@ -400,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const src = button.dataset.src;
             const fields = JSON.parse(button.dataset.fields);
             console.log('Fields String:', fields); // Log the JSON string
-
+            
 
             if (!src || !fields) {
                 throw new Error('Missing required data attributes');
@@ -432,46 +475,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {
         filterForm.addEventListener('submit', handleFilterSubmit);
-    }
-
-    function updateCarGrid(data) {
-        const carGrid = document.querySelector('.car-grid');
-        carGrid.innerHTML = ''; // Clear existing cars
-
-        if (data && data.length > 0) {
-            data.forEach(car => {
-                const carElement = document.createElement('div');
-                carElement.className = 'bg-white rounded-lg shadow-md overflow-hidden';
-
-                carElement.innerHTML = `
-                    <div class="relative">
-                        <img src="${car.thumb || ''}" alt="${car.fields?.year || ''} ${car.fields?.make || ''} ${car.fields?.model || ''}" class="w-full h-48 object-cover">
-                    </div>
-                    <div class="p-4">
-                        <h3 class="text-xl font-bold car-name text-center">${car.fields?.year || ''} ${car.fields?.make ? car.fields.make.toUpperCase() : ''} ${car.fields?.model || ''}</h3>
-                        <p class="text-lg font-bold mb-2 text-center">${car.fields?.mileage ? parseInt(car.fields.mileage).toLocaleString() : '0'} Km. $${car.fields?.price ? parseInt(car.fields.price).toLocaleString() : '0'}</p>
-                        <p class="text-lg font-bold mb-2 text-center">Location: ${car.fields?.location}</p>
-                        <div class="bg-gray-100 p-2 rounded mb-2">
-                            <p class="text-sm">VIN: ${car.vin || 'N/A'}</p>
-                            <p class="text-sm">Stock No: ${car.stock_number || 'N/A'}</p>
-                        </div>
-                        <div class="flex flex-col gap-2 pt-4">
-                            <button data-src="${car.src}" data-fields='${JSON.stringify({ ...car.fields, features: car.features })}' onclick="handleCarDetails(this)" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">View Details</button>
-                        </div>
-                    </div>
-                `;
-
-                carGrid.appendChild(carElement);
-            });
-        } else {
-            const message = document.createElement('div');
-            message.className = 'no-results-message col-span-full py-8 text-center text-gray-500';
-            message.innerHTML = `
-                <div class="text-xl font-semibold mb-2">No cars match your filters</div>
-                <div class="text-sm">Try adjusting your filters or <button class="text-blue-500 hover:underline" onclick="document.getElementById('resetFilters').click()">reset all filters</button></div>
-            `;
-            carGrid.appendChild(message);
-        }
     }
 });
 
