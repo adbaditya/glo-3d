@@ -6,42 +6,61 @@ require('dotenv').config();
 
 const app = express();
 
-// Updated CORS and security headers configuration
+// Configure Helmet with custom CSP
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        frameAncestors: ["'self'", "https://*.hubspot.com", "https://app.hubspot.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:", "http:"],
+        connectSrc: ["'self'", "https:", "http:"],
+      },
+    },
+    frameguard: false, // Disable frameguard as we'll set it manually
+  })
+);
+
+// Custom middleware for frame-ancestors
 app.use((req, res, next) => {
-  // Set CSP header to allow framing from HubSpot domains
-  res.header(
+  res.setHeader(
     'Content-Security-Policy',
-    "frame-ancestors 'self' https://*.hubspot.com https://*.hsforms.com"
+    "frame-ancestors 'self' https://*.hubspot.com https://app.hubspot.com"
   );
-  
-  // Set X-Frame-Options to allow HubSpot
-  res.header('X-Frame-Options', 'ALLOW-FROM https://*.hubspot.com');
-  
-  // Standard security headers
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', true);
-  
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
   next();
 });
 
-// CORS middleware with specific configuration for HubSpot
+// CORS configuration
 app.use(cors({
-  origin: [
-    'https://app.hubspot.com',
-    'https://glo-3d.vercel.app',
-    'http://localhost:3000',
-    /\.hubspot\.com$/,  // Allow all HubSpot subdomains
-    /\.hsforms\.com$/   // Allow HubSpot form domains
-  ],
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'https://app.hubspot.com',
+      'https://glo-3d.vercel.app',
+      /\.hubspot\.com$/
+    ];
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is allowed
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return allowedOrigin === origin;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed'));
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true,
-  maxAge: 86400
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
