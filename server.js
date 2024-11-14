@@ -6,17 +6,26 @@ require('dotenv').config();
 
 const app = express();
 
-// CORS
+// Comprehensive CORS configuration
 app.use(cors({
-  origin: '*', // Configure this more strictly in production
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  origin: ['https://app.hubspot.com', 'https://glo-3d.vercel.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
 }));
 
-// Example in Express.js
+// Set additional security headers
 app.use((req, res, next) => {
-  res.header('Content-Security-Policy', "frame-ancestors 'self' https://*.hubspot.com");
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', true);
+  
+  // Handle OPTIONS method
+  if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+  }
   next();
 });
 
