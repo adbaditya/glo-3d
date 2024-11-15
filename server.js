@@ -86,7 +86,8 @@ app.get('/', async (req, res) => {
       make: req.query.make,
       model: req.query.model,
       year: req.query.year,
-      location: req.query.location
+      location: req.query.location,
+      vehicle_type: req.query.vehicle_type
     };
 
     const data = await fetchInventoryData({});
@@ -99,6 +100,7 @@ app.get('/', async (req, res) => {
         (!filters.model || fields.model === filters.model) &&
         (!filters.year || fields.year === filters.year) &&
         (!filters.location || fields.location === filters.location);
+        (!filters.vehicle_type || fields['1731653551051'] === filters.vehicle_type);
     });
 
     // Get unique values for filters
@@ -106,17 +108,18 @@ app.get('/', async (req, res) => {
     const models = [...new Set(data.data.map(item => item.fields?.model).filter(Boolean))];
     const years = [...new Set(data.data.map(item => item.fields?.year).filter(Boolean))];
     const locations = [...new Set(data.data.map(item => item.fields?.location).filter(Boolean))];
+    const vehicleTypes = [...new Set(data.data.map(item => item.fields?.['1731653551051']).filter(Boolean))];
 
     res.render('index', {
       inventory: inventory,
-      filters: { makes, models, years, locations },
+      filters: { makes, models, years, locations, vehicleTypes },
       selectedFilters: filters
     });
   } catch (error) {
     console.error('Error:', error);
     res.render('index', {
       inventory: [],
-      filters: { makes: [], models: [], years: [], locations: [] },
+      filters: { makes: [], models: [], years: [], locations: [], vehicleTypes: [] },
       selectedFilters: {},
       error: 'Failed to load inventory'
     });
@@ -249,7 +252,17 @@ app.post('/api/clear-cache', (req, res) => {
 
 app.get('/api/inventory/search', async (req, res) => {
   try {
-    const { make, model, year, location, price_sort, price_range, search, limit = 25 } = req.query;
+    const { 
+      make, 
+      model, 
+      year, 
+      location, 
+      price_sort, 
+      price_range, 
+      search,
+      vehicle_type,
+      limit = 25 
+    } = req.query;
 
     const data = await fetchInventoryData({});
     let inventory = data.data || [];
@@ -260,7 +273,8 @@ app.get('/api/inventory/search', async (req, res) => {
       return (!make || fields.make === make) &&
         (!model || fields.model === model) &&
         (!year || fields.year === year) &&
-        (!location || fields.location === location);
+        (!location || fields.location === location) &&
+        (!vehicle_type || fields['1731653551051'] === vehicle_type);
     });
 
     if (search) {

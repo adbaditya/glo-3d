@@ -29,7 +29,7 @@
         .object-cover {
             object-fit: contain;
             width: 100%;
-            height: 270px;
+            height: 100%;
             object-position: top;
         }
 
@@ -43,6 +43,10 @@
 
         div#carModal .space-y-4>:not([hidden])~:not([hidden]) {
             margin-top: 0px !important;
+        }
+
+        div#carModal {
+            z-index: 9999 !important;
         }
     </style>
 </head>
