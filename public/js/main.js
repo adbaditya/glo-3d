@@ -384,6 +384,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 filteredData = sortByPrice(filteredData, priceSortSelect.value);
             }
 
+            if (statusSelect?.value) {
+                filteredData = filteredData.filter(car => car.status === statusSelect.value);
+            }
+
             updateCarGrid(filteredData);
             updateNoResultsMessage(filteredData.length);
 

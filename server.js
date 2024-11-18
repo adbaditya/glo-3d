@@ -70,11 +70,18 @@ async function fetchInventoryData(filters) {
   }
 
   console.log('Fetching fresh data');
-  const response = await glo3dApi.post('?=application/json&', {}, {
-    params: filters
-  });
+  const [gloResponse, vinStatuses] = await Promise.all([
+    glo3dApi.post('?=application/json&', {}, { params: filters }),
+    fetchVinStatuses()
+  ]);
 
-  const data = response.data;
+  const data = gloResponse.data;
+  if (data.data) {
+    data.data = data.data.map(item => ({
+      ...item,
+      status: vinStatuses[item.vin] || 'Unknown'
+    }));
+  }
   inventoryCache.set(cacheKey, data);
   return data;
 }
@@ -87,7 +94,8 @@ app.get('/', async (req, res) => {
       model: req.query.model,
       year: req.query.year,
       location: req.query.location,
-      vehicle_type: req.query.vehicle_type
+      vehicle_type: req.query.vehicle_type,
+      status: req.query.status
     };
 
     const data = await fetchInventoryData({});
@@ -99,8 +107,9 @@ app.get('/', async (req, res) => {
       return (!filters.make || fields.make === filters.make) &&
         (!filters.model || fields.model === filters.model) &&
         (!filters.year || fields.year === filters.year) &&
-        (!filters.location || fields.location === filters.location);
-        (!filters.vehicle_type || fields['1731653551051'] === filters.vehicle_type);
+        (!filters.location || fields.location === filters.location) &&
+        (!filters.vehicle_type || fields['1731653551051'] === filters.vehicle_type) &&
+        (!filters.status || item.status === filters.status);
     });
 
     // Get unique values for filters
@@ -109,10 +118,11 @@ app.get('/', async (req, res) => {
     const years = [...new Set(data.data.map(item => item.fields?.year).filter(Boolean))];
     const locations = [...new Set(data.data.map(item => item.fields?.location).filter(Boolean))];
     const vehicleTypes = [...new Set(data.data.map(item => item.fields?.['1731653551051']).filter(Boolean))];
+    const statuses = [...new Set(data.data.map(item => item.status).filter(Boolean))];
 
     res.render('index', {
       inventory: inventory,
-      filters: { makes, models, years, locations, vehicleTypes },
+      filters: { makes, models, years, locations, vehicleTypes, statuses },
       selectedFilters: filters
     });
   } catch (error) {
@@ -252,16 +262,17 @@ app.post('/api/clear-cache', (req, res) => {
 
 app.get('/api/inventory/search', async (req, res) => {
   try {
-    const { 
-      make, 
-      model, 
-      year, 
-      location, 
-      price_sort, 
-      price_range, 
+    const {
+      make,
+      model,
+      year,
+      status,
+      location,
+      price_sort,
+      price_range,
       search,
       vehicle_type,
-      limit = 25 
+      limit = 25
     } = req.query;
 
     const data = await fetchInventoryData({});
@@ -274,6 +285,7 @@ app.get('/api/inventory/search', async (req, res) => {
         (!model || fields.model === model) &&
         (!year || fields.year === year) &&
         (!location || fields.location === location) &&
+        (!status || item.status === status) &&
         (!vehicle_type || fields['1731653551051'] === vehicle_type);
     });
 
@@ -293,20 +305,52 @@ app.get('/api/inventory/search', async (req, res) => {
 
 app.get('/api/inventory/car/:vin', async (req, res) => {
   try {
-      const { vin } = req.params;
-      const data = await fetchInventoryData({});
-      const car = data.data.find(item => item.vin === vin);
-      
-      if (!car) {
-          return res.status(404).json({ error: 'Car not found' });
-      }
-      
-      res.json(car);
+    const { vin } = req.params;
+    const data = await fetchInventoryData({});
+    const car = data.data.find(item => item.vin === vin);
+
+    if (!car) {
+      return res.status(404).json({ error: 'Car not found' });
+    }
+
+    res.json(car);
   } catch (error) {
-      console.error('Error fetching car details:', error);
-      res.status(500).json({ error: error.message });
+    console.error('Error fetching car details:', error);
+    res.status(500).json({ error: error.message });
   }
 });
+
+const Airtable = require('airtable');
+const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
+
+// Cache for Airtable data
+const statusCache = new Cache();
+
+// Function to fetch status data from Airtable
+async function fetchVinStatuses() {
+  const cacheKey = 'vinStatuses';
+  const cached = statusCache.get(cacheKey);
+  if (cached) return cached;
+
+  const statuses = {};
+  try {
+    const records = await base('VINSync').select({
+      fields: ['VIN', 'STATUS']
+    }).all();
+    records.forEach(record => {
+      const vin = record.get('VIN');
+      const status = record.get('STATUS');
+      if (vin && status) {
+          statuses[vin] = status;
+      }
+  });
+  statusCache.set(cacheKey, statuses);
+  return statuses;
+} catch (error) {
+  console.error('Airtable fetch error:', error);
+  return {};
+}
+}
 
 // Start server
 const PORT = process.env.PORT || 3000;
