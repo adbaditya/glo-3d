@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function showCarDetails(src, fields) {
         try {
             // Set modal title
-            modalTitle.textContent = `${fields.year} ${fields.make} ${fields.model}`;
+            modalTitle.textContent = `${fields.atYear} ${fields.atMake} ${fields.atModel}`;
 
             // Set iframe content
             iframeContainer.innerHTML = `
@@ -117,9 +117,9 @@ document.addEventListener('DOMContentLoaded', function () {
             carfaxLink.classList.remove('opacity-50', 'cursor-not-allowed');
             carfaxLink.textContent = 'View Carfax Report';
 
-            if (fields['1729543266746']) {
+            if (fields.atCarfax) {
                 carfaxContainer.classList.remove('hidden');
-                carfaxLink.href = fields['1729543266746'];
+                carfaxLink.href = fields.atCarfax;
             } else {
                 carfaxContainer.classList.remove('hidden');
                 carfaxLink.href = '#';
@@ -509,17 +509,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Vehicle info configuration
     const infoFields = [
-        { key: 'location', icon: '🔍', label: 'Location' },
+        { key: 'atLocation', icon: '🔍', label: 'Location' },
         { key: 'car_type', icon: '🚗', label: 'Car Type' },
         { key: 'condition', icon: '📍', label: 'Condition' },
-        { key: 'mileage', icon: '⚡', label: 'Mileage' },
+        { key: 'atKM', icon: '⚡', label: 'Mileage' },
         { key: 'transmission', icon: '⚙️', label: 'Transmission' },
-        { key: 'exterior_color', icon: '🎨', label: 'Exterior Color' },
+        { key: 'atColor', icon: '🎨', label: 'Exterior Color' },
         { key: 'fuel_type', icon: '⛽', label: 'Fuel Type' },
         { key: 'engine', icon: '🔧', label: 'Engine' },
-        { key: 'doors', icon: '🚪', label: 'Doors' },
+        { key: 'atSeats', icon: '🚪', label: 'Doors' },
         { key: 'seating', icon: '💺', label: 'Seating' },
-        { key: 'drive_type', icon: '🔄', label: 'Drive Train' },
+        { key: 'atDrive', icon: '🔄', label: 'Drive Train' },
         { key: 'interior_color', icon: '🎨', label: 'Interior Color' },
         { key: 'vin', icon: '🔢', label: 'VIN' },
         { key: 'stock_number', icon: '📋', label: 'Stock Number' }
@@ -548,8 +548,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 ...carData.fields,
                 features: carData.features,
                 '1729543266746': carData.fields['1729543266746'], // Carfax URL
-                '1729543306380': carData.fields['1729543306380']  // Inspection Status
+                '1729543306380': carData.fields['1729543306380'],  // Inspection Status
+                ...carData
             };
+
+            console.log(fields);
 
             showCarDetails(src, fields);
 

@@ -70,18 +70,40 @@ async function fetchInventoryData(filters) {
   }
 
   console.log('Fetching fresh data');
-  const [gloResponse, vinStatuses] = await Promise.all([
+  const [gloResponse, vinData] = await Promise.all([
     glo3dApi.post('?=application/json&', {}, { params: filters }),
     fetchVinStatuses()
   ]);
 
   const data = gloResponse.data;
   if (data.data) {
-    data.data = data.data.map(item => ({
-      ...item,
-      status: vinStatuses[item.vin] || 'Unknown'
-    }));
+    data.data = data.data
+      .filter(item => vinData[item.vin])
+      .map(item => {
+        const customerUrl = item.src ? item.src.replace('/iframe/', '/') : item.src;
+
+        return {
+          ...item,
+          customerUrl,
+          ...(vinData[item.vin] || {
+            status: 'Unknown',
+            atYear: '',
+            atMake: '',
+            atModel: '',
+            atTrimline: '',
+            atCarfax: '',
+            atKM: '',
+            atColor: '',
+            atCost: '',
+            atLocation: '',
+            atDrive: '',
+            atSeats: '',
+            atType: ''
+          })
+        };
+      });
   }
+
   inventoryCache.set(cacheKey, data);
   return data;
 }
@@ -113,11 +135,11 @@ app.get('/', async (req, res) => {
     });
 
     // Get unique values for filters
-    const makes = [...new Set(data.data.map(item => item.fields?.make).filter(Boolean))];
-    const models = [...new Set(data.data.map(item => item.fields?.model).filter(Boolean))];
-    const years = [...new Set(data.data.map(item => item.fields?.year).filter(Boolean))];
-    const locations = [...new Set(data.data.map(item => item.fields?.location).filter(Boolean))];
-    const vehicleTypes = [...new Set(data.data.map(item => item.fields?.['1731653551051']).filter(Boolean))];
+    const makes = [...new Set(data.data.map(item => item.atMake).filter(Boolean))];
+    const models = [...new Set(data.data.map(item => item.atModel).filter(Boolean))];
+    const years = [...new Set(data.data.map(item => item.atYear).filter(Boolean))];
+    const locations = [...new Set(data.data.map(item => item.atLocation).filter(Boolean))];
+    const vehicleTypes = [...new Set(data.data.map(item => item.atType).filter(Boolean))];
     const statuses = [...new Set(data.data.map(item => item.status).filter(Boolean))];
 
     res.render('index', {
@@ -278,21 +300,52 @@ app.get('/api/inventory/search', async (req, res) => {
     const data = await fetchInventoryData({});
     let inventory = data.data || [];
 
-    // Apply filters
+    // Apply filters using Airtable fields
     inventory = inventory.filter(item => {
-      const fields = item.fields || {};
-      return (!make || fields.make === make) &&
-        (!model || fields.model === model) &&
-        (!year || fields.year === year) &&
-        (!location || fields.location === location) &&
+      // Basic field filters
+      const basicFilters = (!make || item.atMake === make) &&
+        (!model || item.atModel === model) &&
+        (!year || item.atYear === year) &&
+        (!location || item.atLocation === location) &&
         (!status || item.status === status) &&
-        (!vehicle_type || fields['1731653551051'] === vehicle_type);
+        (!vehicle_type || item.atType === vehicle_type);
+
+      // Price range filter using atCost
+      let priceFilter = true;
+      if (price_range) {
+        const cost = parseFloat(item.atCost) || 0;
+        switch (price_range) {
+          case '0-15000':
+            priceFilter = cost <= 15000;
+            break;
+          case '15000-30000':
+            priceFilter = cost > 15000 && cost <= 30000;
+            break;
+          case '30000-50000':
+            priceFilter = cost > 30000 && cost <= 50000;
+            break;
+          case '50000+':
+            priceFilter = cost > 50000;
+            break;
+        }
+      }
+
+      // Search filter
+      let searchFilter = true;
+      if (search) {
+        const searchString = `${item.atMake} ${item.atModel} ${item.vin} ${item.atYear} ${item.atTrimline} ${item.atLocation}`.toLowerCase();
+        searchFilter = searchString.includes(search.toLowerCase());
+      }
+
+      return basicFilters && priceFilter && searchFilter;
     });
 
-    if (search) {
-      inventory = inventory.filter(item => {
-        const searchString = `${item.fields?.make} ${item.fields?.model} ${item.vin} ${item.fields?.year} ${item.fields?.trim} ${item.fields?.location} ${item.stock_number}`.toLowerCase();
-        return searchString.includes(search.toLowerCase());
+    // Apply price sorting using atCost
+    if (price_sort) {
+      inventory.sort((a, b) => {
+        const costA = parseFloat(a.atCost) || 0;
+        const costB = parseFloat(b.atCost) || 0;
+        return price_sort === 'asc' ? costA - costB : costB - costA;
       });
     }
 
@@ -332,24 +385,38 @@ async function fetchVinStatuses() {
   const cached = statusCache.get(cacheKey);
   if (cached) return cached;
 
-  const statuses = {};
+  const vinData = {};
   try {
     const records = await base('VINSync').select({
-      fields: ['VIN', 'STATUS']
+      fields: ['VIN', 'STATUS', 'Year', 'Make', 'Model', 'Trimline', 'Carfax URL', 'KM', 'Color', 'Cost', 'Location', 'Drive', 'Seats', 'Type']
     }).all();
     records.forEach(record => {
       const vin = record.get('VIN');
       const status = record.get('STATUS');
-      if (vin && status) {
-          statuses[vin] = status;
+      if (vin) {
+        vinData[vin] = {
+          status: record.get('STATUS'),
+          atYear: record.get('Year'),
+          atMake: record.get('Make'),
+          atModel: record.get('Model'),
+          atTrimline: record.get('Trimline'),
+          atCarfax: record.get('Carfax URL'),
+          atKM: record.get('KM'),
+          atColor: record.get('Color'),
+          atCost: record.get('Cost'),
+          atLocation: record.get('Location'),
+          atDrive: record.get('Drive'),
+          atSeats: record.get('Seats'),
+          atType: record.get('Type')
+        };
       }
-  });
-  statusCache.set(cacheKey, statuses);
-  return statuses;
-} catch (error) {
-  console.error('Airtable fetch error:', error);
-  return {};
-}
+    });
+    statusCache.set(cacheKey, vinData);
+    return vinData;
+  } catch (error) {
+    console.error('Airtable fetch error:', error);
+    return {};
+  }
 }
 
 // Start server
