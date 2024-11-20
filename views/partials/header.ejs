@@ -35,6 +35,11 @@
 
         .car-name {
             text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            text-align: center;
         }
 
         div#iframeContainer {
@@ -47,6 +52,17 @@
 
         div#carModal {
             z-index: 9999 !important;
+        }
+
+        .send-to-client {
+            display: flex;
+            gap: 10px;
+        }
+
+        .send-to-client a,
+        .send-to-client button {
+            display: grid;
+            place-content: center;
         }
     </style>
 </head>

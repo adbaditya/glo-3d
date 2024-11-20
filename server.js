@@ -123,6 +123,14 @@ app.get('/', async (req, res) => {
     const data = await fetchInventoryData({});
     let inventory = data.data || [];
 
+    inventory = inventory.map(item => {
+      const customerUrl = item.src ? item.src.replace('/iframeNova/', '/') : item.src;
+      return {
+        ...item,
+        customerUrl
+      };
+    });
+
     // Apply filters client-side
     inventory = inventory.filter(item => {
       const fields = item.fields || {};
@@ -300,6 +308,8 @@ app.get('/api/inventory/search', async (req, res) => {
     const data = await fetchInventoryData({});
     let inventory = data.data || [];
 
+    console.log(data);
+
     // Apply filters using Airtable fields
     inventory = inventory.filter(item => {
       // Basic field filters
@@ -315,11 +325,11 @@ app.get('/api/inventory/search', async (req, res) => {
       if (price_range) {
         const cost = parseFloat(item.atCost) || 0;
         switch (price_range) {
-          case '0-15000':
-            priceFilter = cost <= 15000;
+          case '0-20000':
+            priceFilter = cost <= 20000;
             break;
-          case '15000-30000':
-            priceFilter = cost > 15000 && cost <= 30000;
+          case '20000-30000':
+            priceFilter = cost > 20000 && cost <= 30000;
             break;
           case '30000-50000':
             priceFilter = cost > 30000 && cost <= 50000;
@@ -418,6 +428,27 @@ async function fetchVinStatuses() {
     return {};
   }
 }
+
+app.post('/api/send-sms', async (req, res) => {
+  try {
+    const { phoneNumber, tourUrl } = req.body;
+    
+    const record = await base('SMSLinks').create([
+      {
+        fields: {
+          'Phone Number': phoneNumber,
+          'Tour URL': tourUrl,
+          'Date Sent': new Date().toISOString()
+        }
+      }
+    ]);
+
+    res.json({ success: true, message: 'SMS record created successfully' });
+  } catch (error) {
+    console.error('Error creating SMS record:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // Start server
 const PORT = process.env.PORT || 3000;
