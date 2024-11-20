@@ -80,7 +80,7 @@ async function fetchInventoryData(filters) {
     data.data = data.data
       .filter(item => vinData[item.vin])
       .map(item => {
-        const customerUrl = item.src ? item.src.replace('/iframe/', '/') : item.src;
+        const customerUrl = item.src ? item.src.replace('/iframeNova/', '/') : item.src;
 
         return {
           ...item,
@@ -307,8 +307,6 @@ app.get('/api/inventory/search', async (req, res) => {
 
     const data = await fetchInventoryData({});
     let inventory = data.data || [];
-
-    console.log(data);
 
     // Apply filters using Airtable fields
     inventory = inventory.filter(item => {

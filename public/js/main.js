@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function () {
                          class="w-full h-48 object-cover">
                 </div>
                 <div class="p-4">
-                    <h3 class="text-xl font-bold car-name text-center">
+                    <h3 class="text-lg font-bold car-name text-center">
                         ${car.fields?.year || ''} ${car.fields?.make ? car.fields.make.toUpperCase() : ''} ${car.fields?.model || ''}
                     </h3>
                     <p class="text-lg font-bold mb-2 text-center">
