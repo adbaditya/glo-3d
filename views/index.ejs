@@ -120,13 +120,23 @@
                     <div class="bg-white rounded-lg shadow-md overflow-hidden">
                         <!-- Car Image -->
                         <div class="relative">
-                            <img src="<%= car.thumb || '' %>"
-                                alt="<%= (car.atYear || '') %> <%= (car.atMake || '') %> <%= (car.atModel || '') %>"
-                                class="w-full h-48 object-cover">
-                            <!-- Certification Icons -->
-                            <div class="absolute top-2 left-2 flex gap-2" style="display: none;">
+                            <% let statusColorClass='' ; switch(car.status) { case 'Ready for Sale' :
+                                statusColorClass='bg-green-100 text-green-800' ; break; case 'Recon' :
+                                statusColorClass='bg-yellow-100 text-yellow-800' ; break; default:
+                                statusColorClass='bg-gray-100 text-gray-800' ; } %>
+                                <div class="">
+                                    <p
+                                        class="<%= statusColorClass %> text-sm font-medium px-3 py-1 text-center shadow-sm">
+                                        <%= car.status || '' %>
+                                    </p>
+                                </div>
+                                <img src="<%= car.thumb || '' %>"
+                                    alt="<%= (car.atYear || '') %> <%= (car.atMake || '') %> <%= (car.atModel || '') %>"
+                                    class="w-full h-48 object-cover">
+                                <!-- Certification Icons -->
+                                <div class="absolute top-2 left-2 flex gap-2" style="display: none;">
 
-                            </div>
+                                </div>
                         </div>
 
                         <!-- Car Details -->
@@ -170,26 +180,19 @@
                                 </button>
                                 <div class="send-to-client">
                                     <a href="mailto:?subject=<%= emailSubject %>&body=<%= emailBody %>"
-                                        class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-center flex items-center justify-center gap-2">
-                                        <svg fill="#fff" width="24" height="24" viewBox="0 0 1920 1920"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M0 1694.235h1920V226H0v1468.235ZM112.941 376.664V338.94H1807.06v37.723L960 1111.233l-847.059-734.57ZM1807.06 526.198v950.513l-351.134-438.89-88.32 70.475 378.353 472.998H174.042l378.353-472.998-88.32-70.475-351.134 438.89V526.198L960 1260.768l847.059-734.57Z"
-                                                fill-rule="evenodd"></path>
-                                        </svg>
+                                        class="w-full text-white px-4 border border-black py-2 rounded text-center flex items-center justify-center gap-2">
+                                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAACe0lEQVR4nO2ZPWgUQRTHf4nBRKOCjUUKP6r4iUEhWihaik2EFLEwEILaCRIFEa+4ShFsxMJGEFLYCFpopxEJgqIRYmGTxJD4VQiSgBL8wJxMeIFhPMPt3tzuO30/+Dd7OzP/93bu7cwsGIZhGIZhGMbfWAMUgBHgK1BSLufxBXBBvFfFHuCjgqDS6gPQmTb4zcCsgiCq1QzQniYBjxSYj6WHSYPfqsB0bCWaBScVGI6t40kSUFBgOLZcTBVTVGA4tlxMloBKKSp4YjYDsL8AKmvAJ+AiMKRgWi/qHnAeeJ9FAo7IPcuAuwqCvwU0iKeuLBJwzLtvBTCcY/APgOWen94sEjALdHj3tgKPcwjeJX6V52M78DmLBJRkm7nRu9/tu59kGLyrPyu98TeJp0wXQhPAeq+NM3Q/g+BvA83euBuAybxWgpPBTGgCbtYw+GtAY/Dkp/JeCr8FtgXtTwHfIwY+B/QHY+wA3mnZC8wAB4I+dgNvIgQ/BuwM+j4oY6raDH0D+oJ+1gI3gF8p+nNtrpc52OyTsdTuBgeDCr04G54m6OMlsDfoowW4Wi/b4VE5VvNxxeuwrB5/lmnjrt0BDgWFDqkxr+rtPOAHcEkWSiHrgG7grKhbroW4tpelr7o9EJkCeso81aVw+4yjwPS/dCI0BgwAbUuM6347A4zXYPzcE1ASzQOvpVheEQ3KtfkajqsmAaWcZAnAZkDlFBVMWfsLYDUAK4LYWwB7DZLDOqDwvxfBEwoMx9bpJAnYosBwbO0nIUMKTMfSaMLt+ALtKQ4eNeoLsIuUdFbwxUWznPd9VMlq+fT8XLJZD0/8GXBOvBuGYRiGYRgGf/IbjUpi4AEioLwAAAAASUVORK5CYII="
+                                            alt="new-post--v1" class="h-10 w-10">
                                     </a>
                                     <button onclick='openSmsModal("<%= smsUrl %>", "<%= smsDetails %>")'
-                                        class="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-center flex items-center justify-center gap-2">
-                                        <svg fill="#fff" height="24" width="24" version="1.1"
-                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                            <path
-                                                d="M448,0H64C28.6,0,0,28.6,0,64v256c0,35.4,28.6,64,64,64h128l-42.7,128l192-128H448c35.4,0,64-28.6,64-64V64C512,28.6,483.4,0,448,0z M128,234.7c-23.6,0-42.7-19.1-42.7-42.7s19.1-42.7,42.7-42.7s42.7,19.1,42.7,42.7S151.6,234.7,128,234.7z M256,234.7c-23.6,0-42.7-19.1-42.7-42.7s19.1-42.7,42.7-42.7s42.7,19.1,42.7,42.7S279.6,234.7,256,234.7z M384,234.7c-23.6,0-42.7-19.1-42.7-42.7s19.1-42.7,42.7-42.7s42.7,19.1,42.7,42.7S407.6,234.7,384,234.7z">
-                                            </path>
-                                        </svg>
+                                        class="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 flex items-center justify-center gap-2 transition duration-200 ease-in-out">
+                                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEpklEQVR4nO2ZX0wcRRzHN6k+NWHnAP+0T/0TfTC1JmqMD9Unib5o4gMhNjwYYwgwwxU0ofUPkRqLNbVNTLQBMRYJKBFRqtUakrba2NpqNRVqW2j5szN3R+XuWK9ngb3j5mv2yrF77Xmc3N2WpnyTXzbZm5v5fnZ+v9ndWUVZ1rKWdWtI5ayJCGoQwZDz4GxWFdSncvqzKuibRFRtzAdAOC/mRUogSTjtKdBq1ucQgO7I2wyI1KEK9reLVz+lLHmhdEXxWO0q4ql5WhXsM8JpzJoNGi3g9EnlZpLqpQ8SQUes2aC6qlWt+98dEV79OBG0SxXMaxZa/gqYecxxXFr1psTYK8cr70yC4LQ7c+enKm4nnDY7me/Eyvu9Ct64zbRRoNGH59OJM+ni9P4Mr/yNMU/mIegH814E7bLBbc8wbazOSoPNOBg5gz/gxWl4cAocJzGGYxjBUVzEYQyhD+fxHf7EfgygB6fRJX9Hh/wV++RJtMrj2Ct/wnvyB7wrD6FJ9mG7PIjX5AHUy/2olT0oN9pQEtgt7eMm0olo9Jl5AM6OLwxgIy4LtmAYfgxhAudwCQPw5QWiTn4JKrvxhN+CUAX91PRTpNHVthnwLggQL9i5PxyJDGIUQccgyo02K404FXFDKF1hL/gMUshabTQEoWHSMYha2ZO0OllZYaVWBilkNfYhBA90RyFICrOLBvgLlx2HIDkAuGA2fGC8EX6EHYcg2QKoY2xtxWT79/1RD4K44jgEyRbAVAjTjSFMQ8dUWoiLmEgJcQKjKSF60b8gBMkFQBhG42XMIB0E1TtRJNygekcSxIt6W/z8C/q+JIjNeiuKRA3K9Ja0ECQXAFdgNP4DA+kgVnteindoHu3ptGruvHm0p9Pdnrr4efOYLp1I9kVctfG5QMvR3yJjSAfREOrFet82vB76Kqkm6kPdWOfbhpdDnyfVBA11Yo1vKypDHWlrgmRdxJxxs+F9vgZMIZIWIh+FTXJ5H5hG1HEIkksAA7OOQ5BcAkQQcxyC5BIgipjjECRrAE6jicYziDoK8Q3O2J5GadQCSGzn0JkFAczn8EQnAxEPZhFzDKI1Yt0HzNXQ5mmHubGmCvbWwgCCdSY62Rz4MG7eCYgfcQElgT12gHZlMSoUNY/Gt/YSr5X+ZvxijCIQC8MfCyMsjYwhRmQAZ2M+DMS86I95U0Ick8P4xDiBEv9u+8uMLODsEWWxIpzusReOPQpFDbbqX6SFGI0FUR5sjbe1//ce3ys4FD03D1Ght1/XZi52KVnp6nvoLvtM2OMOz5b/TKcjxnlsGG9ICW/G88GPDw9jYucgJnYWC3ck6ff4HhB9xxxfyYVUzf0QEfQjwukQEWwy3RJrAjSFvkWxcF9rejIRqmD96uiWNYn+CWcNhLMA4WzQHMfcUlTyKbsxe2F7ZnU863//up3lAo2VKUtJJAlAxiH6ps/iXt+ryebNDxVjbK2y1ERsJqdkBPV6N1z2Irz6paUxZzmcT4BNl96+9qprRGOPKUtZqqBTKVcX83MQrytUlrpUTr9OLlQ65fLQSuVm0cph910qpwcIZ35VsF4Xd2+40Z6WtaxbXf8Cn9C3CuClft8AAAAASUVORK5CYII="
+                                            alt="sms" class="h-10 w-10">
                                     </button>
                                 </div>
-                                <a target="_blank" href="<%= car.customerUrl %>" class="text-blue-600 hover:text-blue-800 text-sm text-center mt-2 break-all">
-                                    <%= car.customerUrl %>
+                                <a target="_blank" href="<%= car.customerUrl %>"
+                                    class="inline-block bg-gray-600 text-white text-sm py-2 px-4 rounded hover:bg-gray-700 transition duration-200 ease-in-out mt-2 text-center">
+                                    Client Vehicle Link
                                 </a>
                             </div>
                         </div>
@@ -449,10 +452,26 @@
                         // Pre-encode the SMS parameters
                         const smsUrl = encodeURIComponent(car.customerUrl || '');
                         const smsDetails = encodeURIComponent(`${car.atYear || ''} ${car.atMake || ''} ${car.atModel || ''}`);
+                        let statusColorClass = '';
+                        switch (car.status) {
+                            case 'Ready for Sale':
+                                statusColorClass = 'bg-green-100 text-green-800';
+                                break;
+                            case 'Recon':
+                                statusColorClass = 'bg-yellow-100 text-yellow-800';
+                                break;
+                            default:
+                                statusColorClass = 'bg-gray-100 text-gray-800';
+                        }
 
                         return `
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="relative">
+                <div class="">
+                    <p class="${statusColorClass} text-sm font-medium px-3 py-1 text-center shadow-sm">
+                        ${car.status || ''}
+                    </p>
+                </div>
                 <img src="${car.thumb || ''}" 
                      alt="${car.atYear || ''} ${car.atMake || ''} ${car.atModel || ''}"
                      class="w-full h-48 object-cover">
@@ -484,28 +503,24 @@
                     <div class="send-to-client">
                     <a 
                         href="mailto:?subject=${emailSubject}&body=${emailBody}"
-                        class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-center flex items-center justify-center gap-2">
-                        <svg fill="#fff" width="24" height="24" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0 1694.235h1920V226H0v1468.235ZM112.941 376.664V338.94H1807.06v37.723L960 1111.233l-847.059-734.57ZM1807.06 526.198v950.513l-351.134-438.89-88.32 70.475 378.353 472.998H174.042l378.353-472.998-88.32-70.475-351.134 438.89V526.198L960 1260.768l847.059-734.57Z" fill-rule="evenodd"></path>
-                        </svg>
+                        class="w-full text-white px-4 border border-black py-2 rounded text-center flex items-center justify-center gap-2">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAACe0lEQVR4nO2ZPWgUQRTHf4nBRKOCjUUKP6r4iUEhWihaik2EFLEwEILaCRIFEa+4ShFsxMJGEFLYCFpopxEJgqIRYmGTxJD4VQiSgBL8wJxMeIFhPMPt3tzuO30/+Dd7OzP/93bu7cwsGIZhGIZhGMbfWAMUgBHgK1BSLufxBXBBvFfFHuCjgqDS6gPQmTb4zcCsgiCq1QzQniYBjxSYj6WHSYPfqsB0bCWaBScVGI6t40kSUFBgOLZcTBVTVGA4tlxMloBKKSp4YjYDsL8AKmvAJ+AiMKRgWi/qHnAeeJ9FAo7IPcuAuwqCvwU0iKeuLBJwzLtvBTCcY/APgOWen94sEjALdHj3tgKPcwjeJX6V52M78DmLBJRkm7nRu9/tu59kGLyrPyu98TeJp0wXQhPAeq+NM3Q/g+BvA83euBuAybxWgpPBTGgCbtYw+GtAY/Dkp/JeCr8FtgXtTwHfIwY+B/QHY+wA3mnZC8wAB4I+dgNvIgQ/BuwM+j4oY6raDH0D+oJ+1gI3gF8p+nNtrpc52OyTsdTuBgeDCr04G54m6OMlsDfoowW4Wi/b4VE5VvNxxeuwrB5/lmnjrt0BDgWFDqkxr+rtPOAHcEkWSiHrgG7grKhbroW4tpelr7o9EJkCeso81aVw+4yjwPS/dCI0BgwAbUuM6347A4zXYPzcE1ASzQOvpVheEQ3KtfkajqsmAaWcZAnAZkDlFBVMWfsLYDUAK4LYWwB7DZLDOqDwvxfBEwoMx9bpJAnYosBwbO0nIUMKTMfSaMLt+ALtKQ4eNeoLsIuUdFbwxUWznPd9VMlq+fT8XLJZD0/8GXBOvBuGYRiGYRgGf/IbjUpi4AEioLwAAAAASUVORK5CYII=" alt="new-post--v1" class="h-10 w-10">
                     </a>
                     <button 
                         onclick='openSmsModal("${smsUrl}", "${smsDetails}")'
-                        class="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-center flex items-center justify-center gap-2">
-                        <svg fill="#fff" height="24" width="24" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                            <path d="M448,0H64C28.6,0,0,28.6,0,64v256c0,35.4,28.6,64,64,64h128l-42.7,128l192-128H448c35.4,0,64-28.6,64-64V64C512,28.6,483.4,0,448,0z M128,234.7c-23.6,0-42.7-19.1-42.7-42.7s19.1-42.7,42.7-42.7s42.7,19.1,42.7,42.7S151.6,234.7,128,234.7z M256,234.7c-23.6,0-42.7-19.1-42.7-42.7s19.1-42.7,42.7-42.7s42.7,19.1,42.7,42.7S279.6,234.7,256,234.7z M384,234.7c-23.6,0-42.7-19.1-42.7-42.7s19.1-42.7,42.7-42.7s42.7,19.1,42.7,42.7S407.6,234.7,384,234.7z"></path>
-                        </svg>
+                        class="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 flex items-center justify-center gap-2 transition duration-200 ease-in-out">
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEpklEQVR4nO2ZX0wcRRzHN6k+NWHnAP+0T/0TfTC1JmqMD9Unib5o4gMhNjwYYwgwwxU0ofUPkRqLNbVNTLQBMRYJKBFRqtUakrba2NpqNRVqW2j5szN3R+XuWK9ngb3j5mv2yrF77Xmc3N2WpnyTXzbZm5v5fnZ+v9ndWUVZ1rKWdWtI5ayJCGoQwZDz4GxWFdSncvqzKuibRFRtzAdAOC/mRUogSTjtKdBq1ucQgO7I2wyI1KEK9reLVz+lLHmhdEXxWO0q4ql5WhXsM8JpzJoNGi3g9EnlZpLqpQ8SQUes2aC6qlWt+98dEV79OBG0SxXMaxZa/gqYecxxXFr1psTYK8cr70yC4LQ7c+enKm4nnDY7me/Eyvu9Ct64zbRRoNGH59OJM+ni9P4Mr/yNMU/mIegH814E7bLBbc8wbazOSoPNOBg5gz/gxWl4cAocJzGGYxjBUVzEYQyhD+fxHf7EfgygB6fRJX9Hh/wV++RJtMrj2Ct/wnvyB7wrD6FJ9mG7PIjX5AHUy/2olT0oN9pQEtgt7eMm0olo9Jl5AM6OLwxgIy4LtmAYfgxhAudwCQPw5QWiTn4JKrvxhN+CUAX91PRTpNHVthnwLggQL9i5PxyJDGIUQccgyo02K404FXFDKF1hL/gMUshabTQEoWHSMYha2ZO0OllZYaVWBilkNfYhBA90RyFICrOLBvgLlx2HIDkAuGA2fGC8EX6EHYcg2QKoY2xtxWT79/1RD4K44jgEyRbAVAjTjSFMQ8dUWoiLmEgJcQKjKSF60b8gBMkFQBhG42XMIB0E1TtRJNygekcSxIt6W/z8C/q+JIjNeiuKRA3K9Ja0ECQXAFdgNP4DA+kgVnteindoHu3ptGruvHm0p9Pdnrr4efOYLp1I9kVctfG5QMvR3yJjSAfREOrFet82vB76Kqkm6kPdWOfbhpdDnyfVBA11Yo1vKypDHWlrgmRdxJxxs+F9vgZMIZIWIh+FTXJ5H5hG1HEIkksAA7OOQ5BcAkQQcxyC5BIgipjjECRrAE6jicYziDoK8Q3O2J5GadQCSGzn0JkFAczn8EQnAxEPZhFzDKI1Yt0HzNXQ5mmHubGmCvbWwgCCdSY62Rz4MG7eCYgfcQElgT12gHZlMSoUNY/Gt/YSr5X+ZvxijCIQC8MfCyMsjYwhRmQAZ2M+DMS86I95U0Ick8P4xDiBEv9u+8uMLODsEWWxIpzusReOPQpFDbbqX6SFGI0FUR5sjbe1//ce3ys4FD03D1Ght1/XZi52KVnp6nvoLvtM2OMOz5b/TKcjxnlsGG9ICW/G88GPDw9jYucgJnYWC3ck6ff4HhB9xxxfyYVUzf0QEfQjwukQEWwy3RJrAjSFvkWxcF9rejIRqmD96uiWNYn+CWcNhLMA4WzQHMfcUlTyKbsxe2F7ZnU863//up3lAo2VKUtJJAlAxiH6ps/iXt+ryebNDxVjbK2y1ERsJqdkBPV6N1z2Irz6paUxZzmcT4BNl96+9qprRGOPKUtZqqBTKVcX83MQrytUlrpUTr9OLlQ65fLQSuVm0cph910qpwcIZ35VsF4Xd2+40Z6WtaxbXf8Cn9C3CuClft8AAAAASUVORK5CYII=" alt="sms" class="h-10 w-10">
                     </button>
                     </div>
-                    <a target="_blank" href="${car.customerUrl || '#'}" class="text-blue-600 hover:text-blue-800 text-sm text-center mt-2 break-all">
-                    ${car.customerUrl || ''}
-                </a>
+                    <a target="_blank" href="${car.customerUrl || '#'}" 
+   class="inline-block bg-gray-600 text-white text-sm py-2 px-4 rounded hover:bg-gray-700 transition duration-200 ease-in-out mt-2 text-center">
+    Client Vehicle Link
+</a>
                 </div>
             </div>
         </div>
     `}).join('');
                 }
-
                 // Function to update no results message
                 function updateNoResultsMessage(count) {
                     const existingMessage = document.querySelector('.no-results-message');
@@ -554,7 +569,7 @@
             <button 
                 id="sendSmsButton"
                 onclick="sendSms()"
-                class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800">
                 Send Message Now
             </button>
         </div>
