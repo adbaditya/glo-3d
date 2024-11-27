@@ -433,6 +433,7 @@ async function fetchVinStatuses() {
         };
       }
     });
+    console.log(vinData);
     statusCache.set(cacheKey, vinData);
     return vinData;
   } catch (error) {

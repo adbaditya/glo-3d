@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function showCarDetails(src, fields) {
         try {
             // Set modal title
-            modalTitle.textContent = `${fields.atYear} ${fields.atMake} ${fields.atModel}`;
+            modalTitle.textContent = `${fields.atYear} ${fields.atMake} ${fields.atModel} ${fields.atTrimline}`;
 
             // Set iframe content
             iframeContainer.innerHTML = `
@@ -188,26 +188,46 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateVehicleInfo(fields) {
         // Clear previous info
         vehicleInfoContainer.innerHTML = '';
-
-        // Create info rows
-        infoFields.forEach(field => {
-            const value = fields[field.key];
-
-            if (value) {
-                const row = document.createElement('div');
-                row.className = 'flex items-center space-x-3 py-2 border-b border-gray-100';
-                row.innerHTML = `
-                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                        <span class="text-lg">${field.icon}</span>
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-sm text-gray-600">${field.label}</div>
-                        <div class="font-medium">${value}</div>
-                    </div>
-                `;
-                vehicleInfoContainer.appendChild(row);
+    
+        // Calculate the midpoint for two-column layout
+        const midpoint = Math.ceil(infoFields.length / 2);
+    
+        // Create left column
+        const leftColumn = document.createElement('div');
+        const rightColumn = document.createElement('div');
+    
+        // Process all fields in order
+        infoFields.forEach((field, index) => {
+            const value = fields[field.key] || 'N/A';
+            
+            const row = document.createElement('div');
+            row.className = 'flex items-center space-x-3 py-2 border-b border-gray-100';
+            row.innerHTML = `
+                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <span class="text-lg">${field.icon}</span>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm text-gray-600">${field.label}</div>
+                    <div class="font-medium">${value}</div>
+                </div>
+            `;
+    
+            // Add to appropriate column based on index
+            if (index < midpoint) {
+                leftColumn.appendChild(row);
+            } else {
+                rightColumn.appendChild(row);
             }
         });
+    
+        // Set up grid container
+        vehicleInfoContainer.style.display = 'grid';
+        vehicleInfoContainer.style.gridTemplateColumns = '1fr 1fr';
+        vehicleInfoContainer.style.gap = '0px 20px';
+    
+        // Add columns to container
+        vehicleInfoContainer.appendChild(leftColumn);
+        vehicleInfoContainer.appendChild(rightColumn);
     }
 
     function updateFeatures(features) {
@@ -510,21 +530,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Vehicle info configuration
     const infoFields = [
+        { key: 'stock_number', icon: '📋', label: 'Stock Number' },
+        { key: 'year', icon: '📋', label: 'Year' },
+        { key: 'make', icon: '📋', label: 'Make' },
+        { key: 'model', icon: '📋', label: 'Model' },
+        { key: 'atTrimline', icon: '📋', label: 'Trim' },
+        { key: 'atKM', icon: '⚡', label: 'Mileage' },
+        { key: 'vin', icon: '🔢', label: 'VIN' },
         { key: 'atLocation', icon: '🔍', label: 'Location' },
         { key: 'car_type', icon: '🚗', label: 'Car Type' },
         { key: 'condition', icon: '📍', label: 'Condition' },
-        { key: 'atKM', icon: '⚡', label: 'Mileage' },
-        { key: 'transmission', icon: '⚙️', label: 'Transmission' },
-        { key: 'atColor', icon: '🎨', label: 'Exterior Color' },
         { key: 'fuel_type', icon: '⛽', label: 'Fuel Type' },
         { key: 'engine', icon: '🔧', label: 'Engine' },
+        { key: 'atDrive', icon: '🔄', label: 'Drive Train' },
+        { key: 'transmission', icon: '⚙️', label: 'Transmission' },
         { key: 'atSeats', icon: '🚪', label: 'Doors' },
         { key: 'seating', icon: '💺', label: 'Seating' },
-        { key: 'atDrive', icon: '🔄', label: 'Drive Train' },
+        { key: 'atColor', icon: '🎨', label: 'Exterior Color' },
         { key: 'interior_color', icon: '🎨', label: 'Interior Color' },
-        { key: 'atDeclaration', icon: '⚠️', label: 'Damage Disclosed' },
-        { key: 'vin', icon: '🔢', label: 'VIN' },
-        { key: 'stock_number', icon: '📋', label: 'Stock Number' }
+        { key: 'atDeclaration', icon: '⚠️', label: 'Damage Disclosed' }
     ];
 
     // Set up global handlers
