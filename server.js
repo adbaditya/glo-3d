@@ -98,7 +98,14 @@ async function fetchInventoryData(filters) {
             atLocation: '',
             atDrive: '',
             atSeats: '',
-            atType: ''
+            atType: '',
+            atDeclaration: '',
+            atOnSite: '',
+            atInspection: '',
+            atDetailed: '',
+            atNewPics: '',
+            atCarMedia: '',
+            atAFC: ''
           })
         };
       });
@@ -396,7 +403,7 @@ async function fetchVinStatuses() {
   const vinData = {};
   try {
     const records = await base('VINSync').select({
-      fields: ['VIN', 'STATUS', 'Year', 'Make', 'Model', 'Trimline', 'Carfax URL', 'KM', 'Color', 'Cost', 'Location', 'Drive', 'Seats', 'Type']
+      fields: ['VIN', 'STATUS', 'Year', 'Make', 'Model', 'Trimline', 'Carfax URL', 'KM', 'Color', 'Cost', 'Location', 'Drive', 'Seats', 'Type', 'Declaration', 'OnSite', 'Inspection', 'Detailed', 'New Pics', 'Car Media', 'AFC']
     }).all();
     records.forEach(record => {
       const vin = record.get('VIN');
@@ -415,7 +422,14 @@ async function fetchVinStatuses() {
           atLocation: record.get('Location'),
           atDrive: record.get('Drive'),
           atSeats: record.get('Seats'),
-          atType: record.get('Type')
+          atType: record.get('Type'),
+          atDeclaration: record.get('Declaration'),
+          atOnSite: record.get('OnSite'),
+          atInspection: record.get('Inspection'),
+          atDetailed: record.get('Detailed'),
+          atNewPics: record.get('New Pics'),
+          atCarMedia: record.get('Car Media'),
+          atAFC: record.get('AFC')
         };
       }
     });

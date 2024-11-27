@@ -192,6 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Create info rows
         infoFields.forEach(field => {
             const value = fields[field.key];
+
             if (value) {
                 const row = document.createElement('div');
                 row.className = 'flex items-center space-x-3 py-2 border-b border-gray-100';
@@ -521,6 +522,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { key: 'seating', icon: '💺', label: 'Seating' },
         { key: 'atDrive', icon: '🔄', label: 'Drive Train' },
         { key: 'interior_color', icon: '🎨', label: 'Interior Color' },
+        { key: 'atDeclaration', icon: '⚠️', label: 'Damage Disclosed' },
         { key: 'vin', icon: '🔢', label: 'VIN' },
         { key: 'stock_number', icon: '📋', label: 'Stock Number' }
     ];

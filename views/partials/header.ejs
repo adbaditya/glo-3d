@@ -72,6 +72,73 @@
         .show-cars-bttn {
             background-color: #E1CA96;
         }
+
+        /* Add keyframes for fade in from left */
+        @keyframes fadeInLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .car-inspection-status svg {
+            width: 25px;
+            height: 25px;
+        }
+
+        .car-inspection-status {
+            opacity: 0;
+            animation: fadeInLeft 0.5s ease forwards;
+            animation-delay: 3s;
+            z-index: 10;
+        }
+
+        /* Status icon styles */
+        .status-icon-wrapper {
+            position: relative;
+        }
+
+        /* Tooltip styles */
+        .status-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.5rem 1rem;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 50;
+        }
+
+        .status-icon-wrapper:hover .status-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Update the container to allow overflow */
+        .bg-white.rounded-lg.shadow-md {
+            overflow: visible !important;
+        }
+
+        .overflow-hidden {
+            overflow: visible !important;
+        }
+
+        .flex.items-center.justify-start.gap-2.car-inspection-status svg {
+            width: 20px;
+            height: 30px;
+        }
     </style>
 </head>
 
