@@ -394,6 +394,16 @@
                     inspectionLink.href = '#';
                 };
 
+                function convertCarType(type) {
+                    if (!type) return '';
+                    switch (type.toUpperCase()) {
+                        case 'HB':
+                            return 'Hatchback';
+                        default:
+                            return type;
+                    }
+                }
+
                 // Add click event listener to the Show Cars button
                 if (showCarsButton) {
                     showCarsButton.addEventListener('click', async (e) => {
@@ -406,8 +416,13 @@
                         const location = filterForm.querySelector('[name="location"]').value;
                         const priceSort = filterForm.querySelector('[name="price_sort"]').value;
                         const priceRange = filterForm.querySelector('[name="price_range"]').value;
-                        const vehicleType = filterForm.querySelector('[name="vehicle_type"]').value;
+                        let vehicleType = filterForm.querySelector('[name="vehicle_type"]').value;
                         const status = filterForm.querySelector('[name="status"]').value;
+
+                        if (vehicleType === 'Hatchback') {
+                            vehicleType = 'HB';
+                        }
+
 
                         // Log the values to verify they're being captured
                         console.log('Filter values:', { year, make, model, location, priceSort, priceRange });
@@ -427,6 +442,14 @@
                             // Make the API call
                             const response = await fetch(`/api/inventory/search?${params.toString()}`);
                             let data = await response.json();
+
+                            if (vehicleType) {
+                                data = data.filter(car => {
+                                    const carType = car.atType?.toUpperCase() || '';
+                                    return carType === 'HATCHBACK' ? 'HB' === vehicleType.toUpperCase()
+                                        : carType === vehicleType.toUpperCase();
+                                });
+                            }
 
                             if (status) {
                                 data = data.filter(car => car.status === status);
@@ -819,6 +842,24 @@
                 const modal = document.getElementById('smsModal');
                 if (event.target === modal) {
                     closeSmsModal();
+                }
+            });
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Get the vehicle type dropdown
+                const vehicleTypeSelect = document.querySelector('select[name="vehicle_type"]');
+
+                if (vehicleTypeSelect) {
+                    // Get all options
+                    const options = vehicleTypeSelect.querySelectorAll('option');
+
+                    // Convert each option text if needed
+                    options.forEach(option => {
+                        if (option.value === 'HB') {
+                            option.textContent = 'Hatchback';
+                        }
+                    });
                 }
             });
         </script>

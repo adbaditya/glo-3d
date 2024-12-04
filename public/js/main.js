@@ -188,6 +188,27 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateVehicleInfo(fields) {
         // Clear previous info
         vehicleInfoContainer.innerHTML = '';
+
+        const infoFields = [
+            { key: 'stock_number', icon: '📋', label: 'Stock Number' },
+            { key: 'year', icon: '📅', label: 'Year' },
+            { key: 'make', icon: '🏢', label: 'Make' },
+            { key: 'model', icon: '🔰', label: 'Model' },
+            { key: 'atTrimline', icon: '⭐', label: 'Trim' },
+            { key: 'atKM', icon: '⚡', label: 'Mileage' },
+            { key: 'vin', icon: '🔢', label: 'VIN' },
+            { key: 'atLocation', icon: '🔍', label: 'Location' },
+            { key: 'atType', icon: '🚗', label: 'Car Type' },
+            { key: 'fuel_type', icon: '⛽', label: 'Fuel Type' },
+            { key: 'engine', icon: '🔧', label: 'Engine' },
+            { key: 'atDrive', icon: '🔄', label: 'Drive Train' },
+            { key: 'transmission', icon: '⚙️', label: 'Transmission' },
+            { key: 'atSeats', icon: '🚪', label: 'Doors' },
+            { key: 'seating', icon: '💺', label: 'Seating' },
+            { key: 'atColor', icon: '🎨', label: 'Exterior Color' },
+            { key: 'interior_color', icon: '🎨', label: 'Interior Color' },
+            { key: 'atDeclaration', icon: '⚠️', label: 'Carfax Damage' }
+        ];
     
         // Calculate the midpoint for two-column layout
         const midpoint = Math.ceil(infoFields.length / 2);
@@ -195,10 +216,24 @@ document.addEventListener('DOMContentLoaded', function () {
         // Create left column
         const leftColumn = document.createElement('div');
         const rightColumn = document.createElement('div');
+
+        function convertCarType(type) {
+            if (!type) return 'N/A';
+            switch(type.toUpperCase()) {
+                case 'HB':
+                    return 'Hatchback';
+                default:
+                    return type;
+            }
+        }
     
         // Process all fields in order
         infoFields.forEach((field, index) => {
-            const value = fields[field.key] || 'N/A';
+            let value = fields[field.key] || 'N/A';
+
+            if (field.key === 'atType') {
+                value = convertCarType(value);
+            }
             
             const row = document.createElement('div');
             row.className = 'flex items-center space-x-3 py-2 border-b border-gray-100';
@@ -527,28 +562,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (resetButton) {
         resetButton.addEventListener('click', handleFilterReset);
     }
-
-    // Vehicle info configuration
-    const infoFields = [
-        { key: 'stock_number', icon: '📋', label: 'Stock Number' },
-        { key: 'year', icon: '📅', label: 'Year' },
-        { key: 'make', icon: '🚘', label: 'Make' },
-        { key: 'model', icon: '🔰', label: 'Model' },
-        { key: 'atTrimline', icon: '⭐', label: 'Trim' },
-        { key: 'atKM', icon: '⚡', label: 'Mileage' },
-        { key: 'vin', icon: '🔢', label: 'VIN' },
-        { key: 'atLocation', icon: '🔍', label: 'Location' },
-        { key: 'car_type', icon: '🚗', label: 'Car Type' },
-        { key: 'fuel_type', icon: '⛽', label: 'Fuel Type' },
-        { key: 'engine', icon: '🔧', label: 'Engine' },
-        { key: 'atDrive', icon: '🔄', label: 'Drive Train' },
-        { key: 'transmission', icon: '⚙️', label: 'Transmission' },
-        { key: 'atSeats', icon: '🚪', label: 'Doors' },
-        { key: 'seating', icon: '💺', label: 'Seating' },
-        { key: 'atColor', icon: '🎨', label: 'Exterior Color' },
-        { key: 'interior_color', icon: '🎨', label: 'Interior Color' },
-        { key: 'atDeclaration', icon: '⚠️', label: 'Carfax Damage' }
-    ];
 
     // Set up global handlers
     window.handleCarDetails = async function (button) {
