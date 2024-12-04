@@ -531,15 +531,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // Vehicle info configuration
     const infoFields = [
         { key: 'stock_number', icon: '📋', label: 'Stock Number' },
-        { key: 'year', icon: '📋', label: 'Year' },
-        { key: 'make', icon: '📋', label: 'Make' },
-        { key: 'model', icon: '📋', label: 'Model' },
-        { key: 'atTrimline', icon: '📋', label: 'Trim' },
+        { key: 'year', icon: '📅', label: 'Year' },
+        { key: 'make', icon: '🚘', label: 'Make' },
+        { key: 'model', icon: '🔰', label: 'Model' },
+        { key: 'atTrimline', icon: '⭐', label: 'Trim' },
         { key: 'atKM', icon: '⚡', label: 'Mileage' },
         { key: 'vin', icon: '🔢', label: 'VIN' },
         { key: 'atLocation', icon: '🔍', label: 'Location' },
         { key: 'car_type', icon: '🚗', label: 'Car Type' },
-        { key: 'condition', icon: '📍', label: 'Condition' },
         { key: 'fuel_type', icon: '⛽', label: 'Fuel Type' },
         { key: 'engine', icon: '🔧', label: 'Engine' },
         { key: 'atDrive', icon: '🔄', label: 'Drive Train' },
@@ -548,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { key: 'seating', icon: '💺', label: 'Seating' },
         { key: 'atColor', icon: '🎨', label: 'Exterior Color' },
         { key: 'interior_color', icon: '🎨', label: 'Interior Color' },
-        { key: 'atDeclaration', icon: '⚠️', label: 'Damage Disclosed' }
+        { key: 'atDeclaration', icon: '⚠️', label: 'Carfax Damage' }
     ];
 
     // Set up global handlers
