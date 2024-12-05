@@ -1,7 +1,67 @@
-// public/js/main.js
+// public/js/main.
+
+function showToast(message, type = 'success') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+
+    // Create new toast
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    // Trigger reflow and add show class
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function () {
+
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const formData = {
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value
+                };
+                
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('Login successful!', 'success');
+                    // Short delay before reload to show the toast
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast('Invalid credentials', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('Login failed', 'error');
+            }
+        });
+    }
 
     if (window.location.search) {
         window.history.replaceState({}, '', window.location.pathname);
@@ -209,24 +269,24 @@ document.addEventListener('DOMContentLoaded', function () {
             { key: 'interior_color', icon: '🎨', label: 'Interior Color' },
             { key: 'atDeclaration', icon: '⚠️', label: 'Carfax Damage' }
         ];
-    
+
         // Calculate the midpoint for two-column layout
         const midpoint = Math.ceil(infoFields.length / 2);
-    
+
         // Create left column
         const leftColumn = document.createElement('div');
         const rightColumn = document.createElement('div');
 
         function convertCarType(type) {
             if (!type) return 'N/A';
-            switch(type.toUpperCase()) {
+            switch (type.toUpperCase()) {
                 case 'HB':
                     return 'Hatchback';
                 default:
                     return type;
             }
         }
-    
+
         // Process all fields in order
         infoFields.forEach((field, index) => {
             let value = fields[field.key] || 'N/A';
@@ -234,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (field.key === 'atType') {
                 value = convertCarType(value);
             }
-            
+
             const row = document.createElement('div');
             row.className = 'flex items-center space-x-3 py-2 border-b border-gray-100';
             row.innerHTML = `
@@ -246,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="font-medium">${value}</div>
                 </div>
             `;
-    
+
             // Add to appropriate column based on index
             if (index < midpoint) {
                 leftColumn.appendChild(row);
@@ -254,12 +314,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 rightColumn.appendChild(row);
             }
         });
-    
+
         // Set up grid container
         vehicleInfoContainer.style.display = 'grid';
         vehicleInfoContainer.style.gridTemplateColumns = '1fr 1fr';
         vehicleInfoContainer.style.gap = '0px 20px';
-    
+
         // Add columns to container
         vehicleInfoContainer.appendChild(leftColumn);
         vehicleInfoContainer.appendChild(rightColumn);

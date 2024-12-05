@@ -145,6 +145,34 @@
             grid-template-columns: 1fr 1fr;
             gap: 0px 20px;
         }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 9999;
+        }
+
+        .toast.success {
+            background-color: #10B981;
+        }
+
+        .toast.error {
+            background-color: #EF4444;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        div#authButton {
+            z-index: 9998;
+        }
     </style>
 </head>
 

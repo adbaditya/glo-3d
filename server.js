@@ -4,6 +4,10 @@ const axios = require('axios');
 const path = require('path');
 require('dotenv').config();
 
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const { requireAuth, getRandomExpiry } = require('./auth');
+
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -14,6 +18,7 @@ app.use(express.json());
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(cookieParser());
 
 // Cache implementation
 class Cache {
@@ -115,9 +120,79 @@ async function fetchInventoryData(filters) {
   return data;
 }
 
-// Main route
-app.get('/', async (req, res) => {
+// Login endpoint
+app.post('/api/login', async (req, res) => {
   try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: 'Username and password required' });
+    }
+
+    if (username === process.env.MASTER_USERNAME &&
+      password === process.env.MASTER_PASSWORD) {
+
+      const expiry = getRandomExpiry();
+      const token = jwt.sign(
+        { username },
+        process.env.JWT_SECRET,
+        { expiresIn: expiry }
+      );
+
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: expiry
+      });
+
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// Auth check endpoint
+app.get('/api/check-auth', (req, res) => {
+  try {
+    const token = req.cookies.authToken;
+    
+    if (!token) {
+      return res.json({ authenticated: false });
+    }
+    
+    jwt.verify(token, process.env.JWT_SECRET);
+    res.json({ authenticated: true });
+  } catch (err) {
+    console.error('Auth check error:', err);
+    res.clearCookie('authToken');
+    res.json({ authenticated: false });
+  }
+});
+
+// Logout endpoint
+app.post('/api/logout', (req, res) => {
+  res.clearCookie('authToken');
+  res.json({ success: true });
+});
+
+// Main route
+app.get('/', requireAuth, async (req, res) => {
+  try {
+
+    if (!req.user) {
+      return res.render('index', {
+        inventory: [],
+        filters: { makes: [], models: [], years: [], locations: [], vehicleTypes: [], statuses: [] },
+        selectedFilters: {},
+        isAuthenticated: false
+      });
+    }
+
     const filters = {
       make: req.query.make,
       model: req.query.model,
@@ -168,12 +243,13 @@ app.get('/', async (req, res) => {
       inventory: [],
       filters: { makes: [], models: [], years: [], locations: [], vehicleTypes: [] },
       selectedFilters: {},
-      error: 'Failed to load inventory'
+      error: 'Failed to load inventory',
+      isAuthenticated: !!req.user
     });
   }
 });
 
-app.get('/main-grid', async (req, res) => {
+app.get('/main-grid', requireAuth, async (req, res) => {
   try {
     const filters = {
       make: req.query.make,
@@ -217,7 +293,7 @@ app.get('/main-grid', async (req, res) => {
 });
 
 // API route for AJAX requests
-app.get('/api/inventory', async (req, res) => {
+app.get('/api/inventory', requireAuth, async (req, res) => {
   try {
     const filters = {
       make: req.query.make,
@@ -235,7 +311,7 @@ app.get('/api/inventory', async (req, res) => {
   }
 });
 
-app.get('/inventory-table', async (req, res) => {
+app.get('/inventory-table', requireAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
@@ -292,12 +368,12 @@ app.get('/inventory-table', async (req, res) => {
   }
 });
 
-app.post('/api/clear-cache', (req, res) => {
+app.post('/api/clear-cache', requireAuth, (req, res) => {
   inventoryCache.clear();
   res.json({ success: true, message: 'Cache cleared successfully' });
 });
 
-app.get('/api/inventory/search', async (req, res) => {
+app.get('/api/inventory/search', requireAuth, async (req, res) => {
   try {
     const {
       make,
@@ -371,7 +447,7 @@ app.get('/api/inventory/search', async (req, res) => {
   }
 });
 
-app.get('/api/inventory/car/:vin', async (req, res) => {
+app.get('/api/inventory/car/:vin', requireAuth, async (req, res) => {
   try {
     const { vin } = req.params;
     const data = await fetchInventoryData({});
@@ -442,10 +518,10 @@ async function fetchVinStatuses() {
   }
 }
 
-app.post('/api/send-sms', async (req, res) => {
+app.post('/api/send-sms', requireAuth, async (req, res) => {
   try {
     const { phoneNumber, tourUrl } = req.body;
-    
+
     const record = await base('SMSLinks').create([
       {
         fields: {
