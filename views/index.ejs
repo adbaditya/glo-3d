@@ -130,8 +130,9 @@
                                 statusColorClass='style="background-color: #CB4335; color: #fff"' ; break;
                                 case 'DO NOT SELL' : statusColorClass='style="background-color: #CB4335; color: #fff"' ;
                                 break; case 'SOLD' : statusColorClass='style="background-color: #BB8FCE; color: #fff"' ;
-                                break; default: statusColorClass='style="background-color: #f8f9fa; color: #343a40"' ; }
-                                %>
+                                break; case 'FEI Pictures' :
+                                statusColorClass='style="background-color: #3498DB; color: #fff"' ; break; default:
+                                statusColorClass='style="background-color: #f8f9fa; color: #343a40"' ; } %>
                                 <div class="">
                                     <p class="text-sm font-medium px-3 py-1 rounded-tl-md rounded-tr-md text-center shadow-sm"
                                         <%- statusColorClass %>>
@@ -570,6 +571,9 @@
                             case 'SOLD':
                                 statusColorClass = 'style="background-color: #BB8FCE; color: #fff"';
                                 break;
+                            case 'FEI Pictures':
+                                statusColorClass = 'style="background-color: #3498DB; color: #fff"';
+                                break;
                             default:
                                 statusColorClass = 'style="background-color: #f8f9fa; color: #343a40"';
                         }
@@ -864,4 +868,4 @@
             });
         </script>
         <%- include('partials/login-modal') %>
-        <%- include('partials/footer') %>
+            <%- include('partials/footer') %>
