@@ -5,38 +5,37 @@
         <!-- Filters section -->
         <div class="bg-white p-4 rounded-lg shadow mb-6 fixed top-0 left-0 right-0 z-10 filter">
             <form id="filterForm" class="" onsubmit="return false;">
-                <div class="flex gap-6">
+                <div class="grid grid-cols-12 gap-6">
                     <!-- Left Column - Filters -->
-                    <div class="flex-grow">
+                    <div class="col-span-9">
                         <div class="grid grid-cols-4 gap-4">
-                            <!-- Year -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                                <select name="year" class="w-full border border-gray-300 rounded-md p-2">
+                                <select name="year" class="w-full border border-gray-300 rounded-md p-1">
                                     <option value="">All Years</option>
                                     <% filters.years.sort().reverse().forEach(year=> { %>
                                         <option value="<%= year %>" <%=selectedFilters.year===year ? 'selected' : '' %>>
                                             <%= year %>
                                         </option>
-                                    <% }) %>
+                                        <% }) %>
                                 </select>
                             </div>
-        
-                            <!-- Make -->
+                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Make</label>
-                                <select name="make" class="w-full border border-gray-300 rounded-md p-2">
+                                <select name="make" class="w-full border border-gray-300 rounded-md p-1">
                                     <option value="">All Makes</option>
                                     <% filters.makes.sort().forEach(make=> { %>
                                         <option value="<%= make %>" <%=selectedFilters.make===make ? 'selected' : '' %>>
                                             <%= make %>
                                         </option>
-                                    <% }) %>
+                                        <% }) %>
                                 </select>
                             </div>
+            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
-                                <select name="model" class="w-full border border-gray-300 rounded-md p-2">
+                                <select name="model" class="w-full border border-gray-300 rounded-md p-1">
                                     <option value="">All Models</option>
                                     <% filters.models.sort().forEach(model=> { %>
                                         <option value="<%= model %>" <%=selectedFilters.model===model ? 'selected' : '' %>>
@@ -45,11 +44,10 @@
                                         <% }) %>
                                 </select>
                             </div>
-        
-                            <!-- Second Row -->
+            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                                <select name="location" class="w-full border border-gray-300 rounded-md p-2">
+                                <select name="location" class="w-full border border-gray-300 rounded-md p-1">
                                     <option value="">All Locations</option>
                                     <% filters.locations.sort().forEach(location=> { %>
                                         <option value="<%= location %>" <%=selectedFilters.location===location ? 'selected' : ''
@@ -59,9 +57,10 @@
                                         <% }) %>
                                 </select>
                             </div>
+            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Type</label>
-                                <select name="vehicle_type" class="w-full border border-gray-300 rounded-md p-2">
+                                <select name="vehicle_type" class="w-full border border-gray-300 rounded-md p-1">
                                     <option value="">All Types</option>
                                     <% filters.vehicleTypes.sort().forEach(type=> { %>
                                         <option value="<%= type %>" <%=selectedFilters.vehicle_type===type ? 'selected' : '' %>>
@@ -70,17 +69,19 @@
                                         <% }) %>
                                 </select>
                             </div>
+            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Price Sort</label>
-                                <select name="price_sort" class="w-full border border-gray-300 rounded-md p-2">
+                                <select name="price_sort" class="w-full border border-gray-300 rounded-md p-1">
                                     <option value="">Default</option>
                                     <option value="asc">Price: Low to High</option>
                                     <option value="desc">Price: High to Low</option>
                                 </select>
                             </div>
+            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
-                                <select name="price_range" class="w-full border border-gray-300 rounded-md p-2">
+                                <select name="price_range" class="w-full border border-gray-300 rounded-md p-1">
                                     <option value="">All Prices</option>
                                     <option value="0-20000">Under $20,000</option>
                                     <option value="15000-30000">$20,000 - $30,000</option>
@@ -88,28 +89,24 @@
                                     <option value="50000+">Above $50,000</option>
                                 </select>
                             </div>
+            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                <select name="status" class="w-full border border-gray-300 rounded-md p-2">
+                                <select name="status" class="w-full border border-gray-300 rounded-md p-1">
                                     <option value="">All Status</option>
-                                    <% filters.statuses.sort().forEach(status=> { %>
-                                        <option value="<%= status %>" <%=selectedFilters.status===status ? 'selected' : '' %>>
-                                            <%= status %>
-                                        </option>
-                                        <% }) %>
+                                    <option value="Ready for Sale">Ready for Sale</option>
                                 </select>
                             </div>
-                            
                         </div>
                     </div>
-        
+            
                     <!-- Right Column - Buttons -->
-                    <div class="flex flex-col justify-center gap-4 min-w-[200px]">
-                        <button type="button" id="showCarsButton"
+                    <div class="col-span-3 flex flex-col justify-center space-y-4">
+                        <button type="button" id="showCarsButton" 
                             class="w-full bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700 transition-colors">
                             Show Cars
                         </button>
-                        <button type="button" id="resetFilters"
+                        <button type="button" id="resetFilters" 
                             class="w-full bg-gray-500 text-white px-8 py-2 rounded-md hover:bg-gray-600 transition-colors">
                             Reset Filters
                         </button>
@@ -230,8 +227,10 @@
 
                             <!-- Mileage -->
                             <p class="text-base font-bold mb-2 text-center">
-                                <%= car.atKM ? parseInt(car.atKM).toLocaleString() : '0' %><span class="text-sm ml-1">KM</span>
-                                <span class="ml-1">$</span><%= car.atCost ? parseInt(car.atCost).toLocaleString() : '0' %>
+                                <%= car.atKM ? parseInt(car.atKM).toLocaleString() : '0' %><span
+                                        class="text-sm ml-1">KM</span>
+                                    <span class="ml-1">$</span>
+                                    <%= car.atCost ? parseInt(car.atCost).toLocaleString() : '0' %>
                             </p>
 
                             <p class="text-base font-bold mb-2 text-center">
