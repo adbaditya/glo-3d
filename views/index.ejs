@@ -222,10 +222,8 @@
 
                             <!-- Mileage -->
                             <p class="text-base font-bold mb-2 text-center">
-                                <%= car.atKM ? parseInt(car.atKM).toLocaleString() : '0' %><span
-                                        class="text-sm ml-1">KM</span>
-                                    <span class="ml-1">$</span>
-                                    <%= car.atCost ? parseInt(car.atCost).toLocaleString() : '0' %>
+                                <%= car.atKM ? parseInt(car.atKM).toLocaleString() : '0' %><span class="text-sm ml-1">KM</span>
+                                <span class="ml-1">$</span><%= car.atCost ? parseInt(car.atCost).toLocaleString() : '0' %>
                             </p>
 
                             <p class="text-base font-bold mb-2 text-center">
