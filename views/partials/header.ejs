@@ -37,8 +37,10 @@
             text-transform: uppercase;
             width: 100%;
             text-align: center;
-            height: 7vh;
-            line-height: 1.1em;
+            min-height: 2.4em;
+            line-height: 1.2;
+            display: flex;
+            justify-content: center;
         }
 
         div#iframeContainer {
@@ -70,10 +72,6 @@
 
         .show-cars-bttn {
             background-color: #E1CA96;
-        }
-
-        button#resetFilters {
-            width: 200px;
         }
 
         /* Add keyframes for fade in from left */
@@ -177,8 +175,9 @@
             z-index: 9998;
         }
 
-        div#authButton {
-            top: 5.5rem;
+        .col-span-3.flex.flex-col.justify-center.space-y-4.filter-buttons div:nth-child(2) {
+            display: flex;
+            justify-content: space-between;
         }
     </style>
 </head>
