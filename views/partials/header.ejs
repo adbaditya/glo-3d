@@ -8,9 +8,19 @@
     <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' *.hubspot.com">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto Finance Canada - Inventory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Borel&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <!-- Add to header.ejs -->
     <style>
+        body,
+        p {
+            font-family: "Nunito", sans-serif;
+        }
+
         .aspect-w-16 {
             position: relative;
             padding-bottom: 56.25%;
@@ -87,6 +97,8 @@
             animation: fadeInLeft 0.5s ease forwards;
             animation-delay: 3s;
             z-index: 10;
+            display: flex;
+            justify-content: center;
         }
 
         /* Status icon styles */
@@ -184,7 +196,7 @@
             margin: 0 auto;
         }
 
-        @media screen and (max-width: 2000px) {
+        @media screen and (max-width: 1800px) {
             .car-name {
                 text-transform: uppercase;
                 width: 100%;
@@ -194,6 +206,10 @@
                 display: flex;
                 justify-content: center;
             }
+        }
+
+        .car-name {
+            text-transform: uppercase;
         }
     </style>
 </head>
