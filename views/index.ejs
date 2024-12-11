@@ -153,7 +153,7 @@
                                 statusColorClass='style="background-color: #3498DB; color: #fff"' ; break; default:
                                 statusColorClass='style="background-color: #f8f9fa; color: #343a40"' ; } %>
                                 <div class="">
-                                    <p class="text-sm font-medium px-3 py-1 rounded-tl-md rounded-tr-md text-center shadow-sm"
+                                    <p class="text-sm font-medium px-3 py-1 rounded-tl-md rounded-tr-md text-center shadow-sm status-banner"
                                         <%- statusColorClass %>>
                                         <%= car.status || '' %>
                                     </p>
@@ -282,7 +282,7 @@
                                     </button>
                                 </div>
                                 <a target="_blank" href="<%= car.customerUrl %>"
-                                    class="inline-block bg-gray-600 text-white text-sm py-2 px-4 rounded hover:bg-gray-700 transition duration-200 ease-in-out text-center client-vehicle-link">
+                                    class="inline-block bg-gray-600 text-white text-sm py-2 px-4 rounded hover:bg-gray-700 transition duration-200 ease-in-out text-center client-vehicle-link" style="font-size: 16px;">
                                     Client Vehicle Link
                                 </a>
                             </div>
@@ -663,7 +663,7 @@
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="relative">
                 <div class="">
-                    <p class="text-sm font-medium px-3 py-1 text-center shadow-sm" ${statusColorClass}>
+                    <p class="text-sm font-medium px-3 py-1 text-center shadow-sm rounded-tl-md rounded-tr-md status-banner" ${statusColorClass}>
                         ${car.status || ''}
                     </p>
                 </div>
@@ -712,7 +712,7 @@
                     </button>
                     </div>
                     <a target="_blank" href="${car.customerUrl || '#'}" 
-   class="inline-block bg-gray-600 text-white text-sm py-2 px-4 rounded hover:bg-gray-700 transition duration-200 ease-in-out text-center client-vehicle-link">
+   class="inline-block bg-gray-600 text-white text-sm py-2 px-4 rounded hover:bg-gray-700 transition duration-200 ease-in-out text-center client-vehicle-link" style="font-size: 16px;">
     Client Vehicle Link
 </a>
                 </div>
