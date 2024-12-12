@@ -1,10 +1,9 @@
 <!-- views/index.ejs -->
 <%- include('partials/header') %>
 
-    <div class="w-full mx-auto px-4 py-8">
+    <div class="w-full mx-auto px-4 py-8 top-container">
         <!-- Mobile Filter Toggle Button -->
-        <button id="filterToggle"
-            class="md:hidden fixed bottom-4 right-4 bg-blue-600 text-white rounded-full p-4 shadow-lg z-50">
+        <button id="filterToggle" class="md:hidden w-full bg-black text-white p-4 shadow-lg z-50 flex justify-center">
             <span>Filters</span>
         </button>
 
@@ -157,7 +156,7 @@
         </div>
 
         <!-- Inventory Grid -->
-        <div class="car-grid grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 mt-40">
+        <div class="car-grid grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 px-5 py-5 gap-6 mt-40">
             <% inventory.forEach(car=> { %>
                 <% const emailSubject=encodeURIComponent(`Check out this ${car.atYear || '' } ${car.atMake || '' }
                     ${car.atModel || '' }`); const emailBody=encodeURIComponent(`View the 3D Tour here:
@@ -267,14 +266,7 @@
                             </p>
 
                             <!-- Mileage -->
-                            <p class="text-base font-bold mb-2 text-center">
-                                <%= car.atKM ? parseInt(car.atKM).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )
-                                    : '0' %>
-                                    <span class="text-sm ml-1">KM</span>&nbsp;&nbsp;|&nbsp;
-                                    <span class="">$</span>
-                                    <%= car.atCost ?
-                                        parseInt(car.atCost).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," ) : '0' %>
-                            </p>
+                            <p class="text-base font-bold mb-2 text-center"><%= car.atKM ? parseInt(car.atKM).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0' %><span class="text-sm">KM</span>&nbsp;&nbsp;|&nbsp;&nbsp;<span class="">$</span><%= car.atCost ? parseInt(car.atCost).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0' %></p>
 
                             <p class="text-base font-bold mb-2 text-center">
                                 <span class="ml-1">Location:</span>
@@ -710,8 +702,8 @@
                     ${car.atYear || ''} ${car.atMake ? car.atMake.toUpperCase() : ''} ${car.atModel || ''}
                 </h3>
                 <p class="text-gray-600 mb-2"></p>
-                <p class="text-base font-bold mb-2 text-center">
-                    ${car.atKM ? parseInt(car.atKM).toLocaleString() : '0'}<span class="text-sm ml-1">KM</span>&nbsp;&nbsp;|&nbsp;
+                <p class="text-base font-bold mb-2 text-center dollar">
+                    ${car.atKM ? parseInt(car.atKM).toLocaleString() : '0'}<span class="text-sm">KM</span>&nbsp;&nbsp;|&nbsp;
                     <span class="">$</span>${car.atCost ? parseInt(car.atCost).toLocaleString() : '0'}
                 </p>
                 <p class="text-base font-bold mb-2 text-center">
