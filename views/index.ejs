@@ -27,7 +27,12 @@
         <!-- Main Filter Container -->
         <div class="bg-white p-4 rounded-lg shadow mb-6 fixed top-0 left-0 right-0 z-10 filter md:block">
             <!-- Mobile Sidebar Container -->
-            <div class="filter-sidebar transform md:transform-none md:block">
+            <div class="filter-sidebar transform md:transform-none md:block
+    transition-all duration-500 ease-in-out 
+    fixed top-0 left-0 h-full w-full md:w-auto md:static md:h-auto
+    translate-x-[-100%] md:translate-x-0
+    bg-white shadow-xl md:shadow-none z-40
+    data-[state=open]:translate-x-0">
                 <!-- Mobile Header -->
                 <div class="flex items-center justify-between p-4 border-b md:hidden">
                     <h2 class="text-lg font-semibold">Filters</h2>
@@ -1071,6 +1076,23 @@
             filterToggle.addEventListener('click', () => {
                 const isActive = filterToggle.dataset.state === 'active';
                 filterToggle.dataset.state = isActive ? '' : 'active';
+            });
+            const filterSidebar = document.querySelector('.filter-sidebar');
+            const filterClose = document.getElementById('filterClose');
+
+            filterToggle.addEventListener('click', () => {
+                const isOpen = filterToggle.dataset.state === 'active';
+                filterToggle.dataset.state = isOpen ? '' : 'active';
+                filterSidebar.dataset.state = isOpen ? '' : 'open';
+
+                // Optional: Prevent body scrolling when sidebar is open
+                document.body.style.overflow = isOpen ? '' : 'hidden';
+            });
+
+            filterClose.addEventListener('click', () => {
+                filterToggle.dataset.state = '';
+                filterSidebar.dataset.state = '';
+                document.body.style.overflow = '';
             });
         </script>
         <%- include('partials/login-modal') %>
