@@ -289,9 +289,10 @@
                             <p class="text-base font-bold mb-2 text-center">
                                 <%= car.atKM ? parseInt(car.atKM).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )
                                     : '0' %><span class="text-sm">KM</span>&nbsp;&nbsp;|&nbsp;&nbsp;<span
-                                        class="">$</span>
+                                        class="dollar-sign">$</span>
+                                        <span class="dollar-amount">
                                     <%= car.atCost ?
-                                        parseInt(car.atCost).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," ) : '0' %>
+                                        parseInt(car.atCost).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," ) : '0' %></span>
                             </p>
 
                             <p class="text-base font-bold mb-2 text-center">
@@ -730,7 +731,7 @@
                 <p class="text-gray-600 mb-2"></p>
                 <p class="text-base font-bold mb-2 text-center dollar">
                     ${car.atKM ? parseInt(car.atKM).toLocaleString() : '0'}<span class="text-sm">KM</span>&nbsp;&nbsp;|&nbsp;
-                    <span class="">$</span>${car.atCost ? parseInt(car.atCost).toLocaleString() : '0'}
+                    <span class="dollar-sign">$</span>${car.atCost ? parseInt(car.atCost).toLocaleString() : '0'}
                 </p>
                 <p class="text-base font-bold mb-2 text-center">
                     <span class="ml-1">Location:</span> ${car.atLocation || ''}
