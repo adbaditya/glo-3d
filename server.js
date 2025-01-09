@@ -478,33 +478,32 @@ async function fetchVinStatuses() {
 
   const vinData = {};
   try {
-    const records = await base('VINSync').select({
-      fields: ['VIN', 'STATUS', 'Year', 'Make', 'Model', 'Trimline', 'Carfax URL', 'KM', 'Color', 'Cost', 'Location', 'Drive', 'Seats', 'Type', 'Declaration', 'OnSite', 'Inspection', 'Detailed', 'New Pics', 'Car Media', 'AFC']
+    const records = await base('SINGLE INVENTORY').select({
+      fields: ['VIN.', 'SALES STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'CARFAX LINK', 'KM', 'COLOUR', 'HOT LIST COST', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECLARATION $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC']
     }).all();
     records.forEach(record => {
-      const vin = record.get('VIN');
-      const status = record.get('STATUS');
+      const vin = record.get('VIN.');
+      const status = record.get('SALES STATUS');
       if (vin) {
         vinData[vin] = {
-          status: record.get('STATUS'),
-          atYear: record.get('Year'),
-          atMake: record.get('Make'),
-          atModel: record.get('Model'),
-          atTrimline: record.get('Trimline'),
-          atCarfax: record.get('Carfax URL'),
+          status: (record.get('SALES STATUS') || [])[0] || 'Unknown',
+          atYear: record.get('YEAR'),
+          atMake: record.get('MAKE'),
+          atModel: record.get('MODEL'),
+          atTrimline: record.get('TRIMLINE'),
+          atCarfax: record.get('CARFAX LINK'),
           atKM: record.get('KM'),
-          atColor: record.get('Color'),
-          atCost: record.get('Cost'),
-          atLocation: record.get('Location'),
-          atDrive: record.get('Drive'),
-          atSeats: record.get('Seats'),
-          atType: record.get('Type'),
-          atDeclaration: record.get('Declaration'),
-          atOnSite: record.get('OnSite'),
-          atInspection: record.get('Inspection'),
-          atDetailed: record.get('Detailed'),
-          atNewPics: record.get('New Pics'),
-          atCarMedia: record.get('Car Media'),
+          atColor: record.get('COLOUR'),
+          atCost: record.get('HOT LIST COST'),
+          atLocation: record.get('LOCATION'),
+          atDrive: record.get('DRIVE'),
+          atSeats: record.get('SEATS'),
+          atType: record.get('TYPE'),
+          atDeclaration: record.get('DECLARATION $'),
+          atOnSite: record.get('ON SITE'),
+          atInspection: record.get('INSPECTED'),
+          atDetailed: record.get('DETAILED'),
+          atNewPics: record.get('NEW PICS'),
           atAFC: record.get('AFC')
         };
       }
