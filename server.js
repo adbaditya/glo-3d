@@ -4,9 +4,9 @@ const axios = require('axios');
 const path = require('path');
 require('dotenv').config();
 
-const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
-const { requireAuth, getRandomExpiry } = require('./auth');
+//const cookieParser = require('cookie-parser');
+//const jwt = require('jsonwebtoken');
+//const { requireAuth, getRandomExpiry } = require('./auth');
 
 const app = express();
 
@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(cookieParser());
+//app.use(cookieParser());
 
 // Cache implementation
 class Cache {
@@ -121,7 +121,7 @@ async function fetchInventoryData(filters) {
 }
 
 // Login endpoint
-app.post('/api/login', async (req, res) => {
+/*app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -154,10 +154,10 @@ app.post('/api/login', async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
-});
+});*/
 
 // Auth check endpoint
-app.get('/api/check-auth', (req, res) => {
+/*app.get('/api/check-auth', (req, res) => {
   try {
     const token = req.cookies.authToken;
     
@@ -172,16 +172,16 @@ app.get('/api/check-auth', (req, res) => {
     res.clearCookie('authToken');
     res.json({ authenticated: false });
   }
-});
+});*/
 
 // Logout endpoint
-app.post('/api/logout', (req, res) => {
+/*app.post('/api/logout', (req, res) => {
   res.clearCookie('authToken');
   res.json({ success: true });
-});
+});*/
 
 // Main route
-app.get('/', requireAuth, async (req, res) => {
+app.get('/', async (req, res) => {
   try {
 
     if (!req.user) {
@@ -249,7 +249,7 @@ app.get('/', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/main-grid', requireAuth, async (req, res) => {
+app.get('/main-grid', async (req, res) => {
   try {
     const filters = {
       make: req.query.make,
@@ -293,7 +293,7 @@ app.get('/main-grid', requireAuth, async (req, res) => {
 });
 
 // API route for AJAX requests
-app.get('/api/inventory', requireAuth, async (req, res) => {
+app.get('/api/inventory', async (req, res) => {
   try {
     const filters = {
       make: req.query.make,
@@ -311,7 +311,7 @@ app.get('/api/inventory', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/inventory-table', requireAuth, async (req, res) => {
+app.get('/inventory-table', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
@@ -368,12 +368,12 @@ app.get('/inventory-table', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/clear-cache', requireAuth, (req, res) => {
+app.post('/api/clear-cache', (req, res) => {
   inventoryCache.clear();
   res.json({ success: true, message: 'Cache cleared successfully' });
 });
 
-app.get('/api/inventory/search', requireAuth, async (req, res) => {
+app.get('/api/inventory/search', async (req, res) => {
   try {
     const {
       make,
@@ -447,7 +447,7 @@ app.get('/api/inventory/search', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/api/inventory/car/:vin', requireAuth, async (req, res) => {
+app.get('/api/inventory/car/:vin', async (req, res) => {
   try {
     const { vin } = req.params;
     const data = await fetchInventoryData({});
@@ -517,7 +517,7 @@ async function fetchVinStatuses() {
   }
 }
 
-app.post('/api/send-sms', requireAuth, async (req, res) => {
+app.post('/api/send-sms', async (req, res) => {
   try {
     const { phoneNumber, tourUrl } = req.body;
 

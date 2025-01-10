@@ -161,12 +161,12 @@
                                     class="w-full bg-gray-500 text-white px-8 py-2 rounded-md hover:bg-gray-600 transition-colors mr-2">
                                     Reset Filters
                                 </button>
-                                <div id="authButton">
+                                <!--<div id="authButton">
                                     <button id="logoutBtn"
                                         class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow-lg transition duration-200">
                                         Logout
                                     </button>
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
@@ -216,7 +216,7 @@
                                     <p class="text-sm font-medium px-3 py-1 rounded-tl-md rounded-tr-md text-center shadow-sm status-banner"
                                         <%- statusColorClass %>>
                                         <%= car.status || '' %>
-                                    </p>
+                                    </p>R
                                 </div>
                                 <img src="<%= car.thumb || '' %>"
                                     alt="<%= (car.atYear || '') %> <%= (car.atMake || '') %> <%= (car.atModel || '') %>"
@@ -452,6 +452,12 @@
                 const resetFilters = document.getElementById('resetFilters');
                 const modal = document.getElementById('carModal');
                 const modalTitle = document.getElementById('modalTitle');
+
+                setTimeout(() => {
+                    if (showCarsButton) {
+                        showCarsButton.click();
+                    }
+                }, 100);
 
                 window.closeModal = function () {
                     const modal = document.getElementById('carModal');
@@ -1000,7 +1006,7 @@
             });
         </script>
 
-        <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        <!--<div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
             style="display: none;">
             <div class="bg-white p-8 rounded-lg shadow-lg w-96">
                 <h2 class="text-2xl font-bold mb-4">Login Required</h2>
@@ -1020,7 +1026,7 @@
                     </button>
                 </form>
             </div>
-        </div>
+        </div>-->
 
         <!-- Add toast container -->
         <div id="toastContainer" class="fixed top-5 right-5 z-50"></div>
@@ -1053,11 +1059,11 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', async () => {
-                const loginModal = document.getElementById('loginModal');
-                const logoutBtn = document.getElementById('logoutBtn');
+                //const loginModal = document.getElementById('loginModal');
+                //const logoutBtn = document.getElementById('logoutBtn');
 
                 // Check authentication status
-                const checkAuth = async () => {
+                /*const checkAuth = async () => {
                     try {
                         const response = await fetch('/api/check-auth');
                         const data = await response.json();
@@ -1094,10 +1100,10 @@
                         console.error('Logout error:', error);
                         showToast('Logout failed', 'error');
                     }
-                });
+                });*/
 
                 // Check auth status when page loads
-                checkAuth();
+                //checkAuth();
             });
         </script>
         <script>
@@ -1124,5 +1130,4 @@
                 document.body.style.overflow = '';
             });
         </script>
-        <%- include('partials/login-modal') %>
-            <%- include('partials/footer') %>
+        <%- include('partials/footer') %>

@@ -1,5 +1,5 @@
 // auth.js
-const jwt = require('jsonwebtoken');
+/*const jwt = require('jsonwebtoken');
 
 const requireAuth = (req, res, next) => {
   const token = req.cookies.authToken;
@@ -33,4 +33,4 @@ const getRandomExpiry = () => {
   return randomDays * 24 * 60 * 60 * 1000;
 };
 
-module.exports = { requireAuth, getRandomExpiry };
+module.exports = { requireAuth, getRandomExpiry };*/
