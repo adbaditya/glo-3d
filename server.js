@@ -479,7 +479,7 @@ async function fetchVinStatuses() {
   const vinData = {};
   try {
     const records = await base('SINGLE INVENTORY').select({
-      fields: ['VIN.', 'SALES STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'CARFAX LINK', 'KM', 'COLOUR', 'HOT LIST COST', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECLARATION $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC']
+      fields: ['VIN.', 'SALES STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'SALES LOCATION', 'CARFAX LINK', 'KM', 'COLOUR', 'HOT LIST COST', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECLARATION $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC']
     }).all();
     records.forEach(record => {
       const vin = record.get('VIN.');
@@ -495,7 +495,7 @@ async function fetchVinStatuses() {
           atKM: record.get('KM'),
           atColor: record.get('COLOUR'),
           atCost: record.get('HOT LIST COST'),
-          atLocation: record.get('LOCATION'),
+          atLocation: record.get('SALES LOCATION'),
           atDrive: record.get('DRIVE'),
           atSeats: record.get('SEATS'),
           atType: record.get('TYPE'),
