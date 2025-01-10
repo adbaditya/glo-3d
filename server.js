@@ -85,7 +85,7 @@ async function fetchInventoryData(filters) {
     data.data = data.data
       .filter(item => vinData[item.vin])
       .map(item => {
-        const customerUrl = item.src ? item.src.replace('/iframeNova/', '/') : item.src;
+        const customerUrl = item.src;
 
         return {
           ...item,
