@@ -70,7 +70,10 @@ async function fetchInventoryData(filters) {
   const cachedData = inventoryCache.get(cacheKey);
 
   if (cachedData) {
-    console.log('Serving from cache');
+    console.log('Serving from cache:', {
+      dataLength: cachedData.data?.length,
+      sampleItem: cachedData.data?.[0]
+    });
     return cachedData;
   }
 
@@ -81,11 +84,16 @@ async function fetchInventoryData(filters) {
   ]);
 
   const data = gloResponse.data;
+
   if (data.data) {
     data.data = data.data
       .filter(item => vinData[item.vin])
       .map(item => {
         const customerUrl = item.src;
+
+        if (data.data.indexOf(item) === 0) {
+          console.log('Sample transformed item:', item);
+        }
 
         return {
           ...item,
@@ -115,6 +123,9 @@ async function fetchInventoryData(filters) {
         };
       });
   }
+
+  console.log('Processed data length:', data.data.length);
+  console.log('Sample processed item:', data.data[0]);
 
   inventoryCache.set(cacheKey, data);
   return data;
@@ -183,68 +194,96 @@ async function fetchInventoryData(filters) {
 // Main route
 app.get('/', async (req, res) => {
   try {
+    // First get the data
+    const data = await fetchInventoryData({});
+    const inventory = data.data || [];
 
-    if (!req.user) {
-      return res.render('index', {
-        inventory: [],
-        filters: { makes: [], models: [], years: [], locations: [], vehicleTypes: [], statuses: [] },
-        selectedFilters: {},
-        isAuthenticated: false
-      });
+    const statusOrder = [
+      'AVAILABLE',
+      'DEAL PENDING',
+      'SIGNED DEAL',
+      'PENDING DELIVERY',
+      'ON DELIVERY',
+      'DELIVERED',
+      'IN FUNDING',
+      'BOOKED | NOT DELIVERED',
+      'BOOKED | DELIVERED',
+      'DO NOT SELL',
+      'VOID | IN STOCK',
+      'VOID | OUTSOURCED',
+      'WHOLESALE',
+      'Unknown'
+    ];
+
+    inventory.sort((a, b) => {
+      const statusA = a.status || 'Unknown';
+      const statusB = b.status || 'Unknown';
+      return statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB);
+    });
+
+    if (!inventory.length) {
+      throw new Error('No inventory data available');
     }
 
-    const filters = {
-      make: req.query.make,
-      model: req.query.model,
-      year: req.query.year,
-      location: req.query.location,
-      vehicle_type: req.query.vehicle_type,
-      status: req.query.status
+    // Process the filters here, before rendering
+    const processedFilters = {
+      makes: [],
+      models: [],
+      years: [],
+      locations: [],
+      vehicleTypes: [],
+      statuses: []
     };
 
-    const data = await fetchInventoryData({});
-    let inventory = data.data || [];
-
-    inventory = inventory.map(item => {
-      const customerUrl = item.src ? item.src.replace('/iframeNova/', '/') : item.src;
-      return {
-        ...item,
-        customerUrl
-      };
+    // Process each inventory item to build filters
+    inventory.forEach(item => {
+      if (item.atMake) processedFilters.makes.push(item.atMake);
+      if (item.atModel) processedFilters.models.push(item.atModel);
+      if (item.atYear) processedFilters.years.push(item.atYear);
+      if (item.atLocation) {
+        const location = Array.isArray(item.atLocation) ? item.atLocation[0] : item.atLocation;
+        if (location) processedFilters.locations.push(location);
+      }
+      if (item.atType) processedFilters.vehicleTypes.push(item.atType);
+      if (item.status) processedFilters.statuses.push(item.status);
     });
 
-    // Apply filters client-side
-    inventory = inventory.filter(item => {
-      const fields = item.fields || {};
-      return (!filters.make || fields.make === filters.make) &&
-        (!filters.model || fields.model === filters.model) &&
-        (!filters.year || fields.year === filters.year) &&
-        (!filters.location || fields.location === filters.location) &&
-        (!filters.vehicle_type || fields['1731653551051'] === filters.vehicle_type) &&
-        (!filters.status || item.status === filters.status);
-    });
+    // Remove duplicates and sort
+    const filters = {
+      makes: [...new Set(processedFilters.makes)].sort(),
+      models: [...new Set(processedFilters.models)].sort(),
+      years: [...new Set(processedFilters.years)].sort().reverse(),
+      locations: [...new Set(processedFilters.locations)].sort(),
+      vehicleTypes: [...new Set(processedFilters.vehicleTypes)].sort(),
+      statuses: [...new Set(processedFilters.statuses)].sort()
+    };
 
-    // Get unique values for filters
-    const makes = [...new Set(data.data.map(item => item.atMake).filter(Boolean))];
-    const models = [...new Set(data.data.map(item => item.atModel).filter(Boolean))];
-    const years = [...new Set(data.data.map(item => item.atYear).filter(Boolean))];
-    const locations = [...new Set(data.data.map(item => item.atLocation).filter(Boolean))];
-    const vehicleTypes = [...new Set(data.data.map(item => item.atType).filter(Boolean))];
-    const statuses = [...new Set(data.data.map(item => item.status).filter(Boolean))];
+    // Debug log right before rendering
+    //console.log('Final processed filters:', filters);
 
-    res.render('index', {
+    // Only render once with the complete data
+    return res.render('index', {
       inventory: inventory,
-      filters: { makes, models, years, locations, vehicleTypes, statuses },
-      selectedFilters: filters
+      filters: filters,
+      selectedFilters: req.query || {},
+      error: null
     });
+
   } catch (error) {
-    console.error('Error:', error);
-    res.render('index', {
+    console.error('Error in main route:', error);
+    // Render with empty data in case of error
+    return res.render('index', {
       inventory: [],
-      filters: { makes: [], models: [], years: [], locations: [], vehicleTypes: [] },
+      filters: {
+        makes: [],
+        models: [],
+        years: [],
+        locations: [],
+        vehicleTypes: [],
+        statuses: []
+      },
       selectedFilters: {},
-      error: 'Failed to load inventory',
-      isAuthenticated: !!req.user
+      error: 'Failed to load inventory'
     });
   }
 });
@@ -508,7 +547,7 @@ async function fetchVinStatuses() {
         };
       }
     });
-    console.log(vinData);
+    //console.log(vinData);
     statusCache.set(cacheKey, vinData);
     return vinData;
   } catch (error) {
