@@ -72,12 +72,12 @@ async function fetchInventoryData(filters) {
   if (cachedData) {
     console.log('Serving from cache:', {
       dataLength: cachedData.data?.length,
-      sampleItem: cachedData.data?.[0]
+      //sampleItem: cachedData.data?.[0]
     });
     return cachedData;
   }
 
-  console.log('Fetching fresh data');
+  //console.log('Fetching fresh data');
   const [gloResponse, vinData] = await Promise.all([
     glo3dApi.post('?=application/json&', {}, { params: filters }),
     fetchVinStatuses()
@@ -92,7 +92,7 @@ async function fetchInventoryData(filters) {
         const customerUrl = item.src;
 
         if (data.data.indexOf(item) === 0) {
-          console.log('Sample transformed item:', item);
+          //console.log('Sample transformed item:', item);
         }
 
         return {
@@ -108,7 +108,7 @@ async function fetchInventoryData(filters) {
             atKM: '',
             atColor: '',
             atCost: '',
-            atLocation: '',
+            atLocation: [req.query.location],
             atDrive: '',
             atSeats: '',
             atType: '',
@@ -125,7 +125,7 @@ async function fetchInventoryData(filters) {
   }
 
   console.log('Processed data length:', data.data.length);
-  console.log('Sample processed item:', data.data[0]);
+  //console.log('Sample processed item:', data.data[0]);
 
   inventoryCache.set(cacheKey, data);
   return data;
@@ -196,7 +196,18 @@ app.get('/', async (req, res) => {
   try {
     // First get the data
     const data = await fetchInventoryData({});
-    const inventory = data.data || [];
+    let inventory = data.data || [];
+
+    //console.log('Selected location:', req.query.location);
+
+    // Before filtering
+    console.log('Total inventory before filtering:', inventory.length);
+
+    /*console.log('Sample items before filtering:', inventory.slice(0, 2).map(item => ({
+      vin: item.vin,
+      location: item.atLocation,
+      rawLocation: item.atLocation // Log raw location data
+    })));*/
 
     const statusOrder = [
       'AVAILABLE',
@@ -220,6 +231,29 @@ app.get('/', async (req, res) => {
       const statusB = b.status || 'Unknown';
       return statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB);
     });
+
+    if (req.query.location && req.query.location !== 'undefined' && req.query.location !== '') {
+      console.log('Filtering by location:', req.query.location);
+      inventory = inventory.filter(item => {
+        const itemLocations = Array.isArray(item.atLocation) ? item.atLocation : [item.atLocation];
+        const queryLocation = req.query.location.toUpperCase();
+        
+        console.log(`VIN ${item.vin}:`, {
+          locations: itemLocations,
+          query: queryLocation
+        });
+        
+        return itemLocations.some(loc => loc && loc.toUpperCase() === queryLocation);
+      });
+    }
+
+    // After filtering
+    //console.log('Inventory after location filtering:', inventory.length);
+
+    /*console.log('Sample filtered items:', inventory.slice(0, 2).map(item => ({
+      vin: item.vin,
+      location: item.atLocation
+    })));*/
 
     if (!inventory.length) {
       throw new Error('No inventory data available');
@@ -253,7 +287,10 @@ app.get('/', async (req, res) => {
       makes: [...new Set(processedFilters.makes)].sort(),
       models: [...new Set(processedFilters.models)].sort(),
       years: [...new Set(processedFilters.years)].sort().reverse(),
-      locations: [...new Set(processedFilters.locations)].sort(),
+      years: [...new Set(processedFilters.years)].sort().reverse(),
+      locations: [...new Set(inventory
+        .map(item => Array.isArray(item.atLocation) ? item.atLocation[0] : item.atLocation)
+        .filter(Boolean))].sort(),
       vehicleTypes: [...new Set(processedFilters.vehicleTypes)].sort(),
       statuses: [...new Set(processedFilters.statuses)].sort()
     };
@@ -414,49 +451,38 @@ app.post('/api/clear-cache', (req, res) => {
 
 app.get('/api/inventory/search', async (req, res) => {
   try {
-    const {
-      make,
-      model,
-      year,
-      status,
-      location,
-      price_sort,
-      price_range,
-      search,
-      vehicle_type,
-      limit = 25
-    } = req.query;
+    const { make, model, year, status, location, price_sort, price_range, search, vehicle_type } = req.query;
+    console.log('Query params:', req.query);
 
     const data = await fetchInventoryData({});
     let inventory = data.data || [];
 
-    // Apply filters using Airtable fields
     inventory = inventory.filter(item => {
-      // Basic field filters
+      // Location filter
+      if (location) {
+        const cleanLocation = location.toUpperCase();
+        const itemLocations = Array.isArray(item.atLocation) ? item.atLocation : [item.atLocation];
+        if (!itemLocations.some(loc => loc && loc.toString().toUpperCase() === cleanLocation)) {
+          return false;
+        }
+      }
+
+      // Other filters
       const basicFilters = (!make || item.atMake === make) &&
         (!model || item.atModel === model) &&
         (!year || item.atYear === year) &&
-        (!location || item.atLocation === location) &&
         (!status || item.status === status) &&
         (!vehicle_type || item.atType === vehicle_type);
 
-      // Price range filter using atCost
+      // Price range filter
       let priceFilter = true;
       if (price_range) {
         const cost = parseFloat(item.atCost) || 0;
         switch (price_range) {
-          case '0-20000':
-            priceFilter = cost <= 20000;
-            break;
-          case '20000-30000':
-            priceFilter = cost > 20000 && cost <= 30000;
-            break;
-          case '30000-50000':
-            priceFilter = cost > 30000 && cost <= 50000;
-            break;
-          case '50000+':
-            priceFilter = cost > 50000;
-            break;
+          case '0-20000': priceFilter = cost <= 20000; break;
+          case '20000-30000': priceFilter = cost > 20000 && cost <= 30000; break;
+          case '30000-50000': priceFilter = cost > 30000 && cost <= 50000; break;
+          case '50000+': priceFilter = cost > 50000; break;
         }
       }
 
@@ -470,7 +496,6 @@ app.get('/api/inventory/search', async (req, res) => {
       return basicFilters && priceFilter && searchFilter;
     });
 
-    // Apply price sorting using atCost
     if (price_sort) {
       inventory.sort((a, b) => {
         const costA = parseFloat(a.atCost) || 0;
@@ -518,7 +543,7 @@ async function fetchVinStatuses() {
   const vinData = {};
   try {
     const records = await base('SINGLE INVENTORY').select({
-      fields: ['VIN.', 'SALES STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'SALES LOCATION', 'CARFAX LINK', 'KM', 'COLOUR', 'HOT LIST COST', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECLARATION $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC']
+      fields: ['VIN.', 'SALES STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'SALES LOCATION.', 'CARFAX LINK', 'KM', 'COLOUR', 'HOT LIST COST', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECLARATION $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC']
     }).all();
     records.forEach(record => {
       const vin = record.get('VIN.');
@@ -534,7 +559,9 @@ async function fetchVinStatuses() {
           atKM: record.get('KM'),
           atColor: record.get('COLOUR'),
           atCost: record.get('HOT LIST COST'),
-          atLocation: record.get('SALES LOCATION'),
+          atLocation: Array.isArray(record.get('SALES LOCATION.')) ?
+            record.get('SALES LOCATION.') :
+            [record.get('SALES LOCATION.')].filter(Boolean),
           atDrive: record.get('DRIVE'),
           atSeats: record.get('SEATS'),
           atType: record.get('TYPE'),
