@@ -543,14 +543,14 @@ async function fetchVinStatuses() {
   const vinData = {};
   try {
     const records = await base('SINGLE INVENTORY').select({
-      fields: ['VIN.', 'SALES STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'SALES LOCATION.', 'CARFAX LINK', 'KM', 'COLOUR', 'HOT LIST COST', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECLARATION $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC']
+      fields: ['VIN.', 'STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'SALES LOCATION.', 'CARFAX LINK', 'KM', 'COLOUR', 'COST.', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECS $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC']
     }).all();
     records.forEach(record => {
       const vin = record.get('VIN.');
-      const status = record.get('SALES STATUS');
+      const status = record.get('STATUS');
       if (vin) {
         vinData[vin] = {
-          status: (record.get('SALES STATUS') || [])[0] || 'Unknown',
+          status: (record.get('STATUS') || [])[0] || 'Unknown',
           atYear: record.get('YEAR'),
           atMake: record.get('MAKE'),
           atModel: record.get('MODEL'),
@@ -558,14 +558,14 @@ async function fetchVinStatuses() {
           atCarfax: record.get('CARFAX LINK'),
           atKM: record.get('KM'),
           atColor: record.get('COLOUR'),
-          atCost: record.get('HOT LIST COST'),
+          atCost: record.get('COST.'),
           atLocation: Array.isArray(record.get('SALES LOCATION.')) ?
             record.get('SALES LOCATION.') :
             [record.get('SALES LOCATION.')].filter(Boolean),
           atDrive: record.get('DRIVE'),
           atSeats: record.get('SEATS'),
           atType: record.get('TYPE'),
-          atDeclaration: record.get('DECLARATION $'),
+          atDeclaration: record.get('DECS $'),
           atOnSite: record.get('ON SITE'),
           atInspection: record.get('INSPECTED'),
           atDetailed: record.get('DETAILED'),
