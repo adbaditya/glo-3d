@@ -1,0 +1,220 @@
+<%- include('partials/header') %>
+
+  <style>
+    div#vehicleInfoContainer .flex.items-center,
+    gap-3 {
+      border-bottom: 1px solid #eee;
+      padding: 6px 0;
+    }
+  </style>
+
+  <div class="container-fluid mx-auto max-w-[1800px]">
+    <div id="carModal" class="bg-white rounded-lg w-full max-w-[95%] md:max-w-[80%] xl:max-w-[1000px] mx-auto">
+      <div class="p-4 border-b sticky top-0 bg-white z-10 flex items-center">
+        <a href="/" class="p-2 rounded-full hover:bg-gray-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </a>
+        <h2 id="modalTitle" class="text-xl md:text-2xl font-bold flex-1 text-center"></h2>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="flex flex-col">
+        <!-- Top Section with iframe and Vehicle Info -->
+        <div class="flex flex-col md:flex-row">
+          <!-- Left side - iframe -->
+          <div class="w-full md:w-2/3">
+            <div id="iframeContainer" class="w-full h-[400px] md:h-[600px]">
+              <!-- iframe will be inserted here -->
+            </div>
+          </div>
+
+          <!-- Right side - Vehicle Info -->
+          <div class="w-full md:w-1/3 border-t md:border-t-0 md:border-l">
+            <div class="p-4 md:p-6">
+              <h3 class="text-lg md:text-xl font-bold mb-4 md:mb-6">Vehicle Info</h3>
+              <div id="vehicleInfoContainer" class="space-y-4"
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 0px 20px;">
+                <!-- Vehicle info will be inserted here -->
+              </div>
+
+              <!-- Additional Links Section -->
+              <div class="mt-6 md:mt-8 text-xs font-bold italic">
+                <span>* Please right click on reports and open in a new tab to view the reports.</span>
+              </div>
+              <div class="space-y-4 border-t pt-4 md:pt-6">
+                <div id="carfaxContainer" class="hidden">
+                  <a id="carfaxLink" href="#" target="_blank"
+                    class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center w-full">
+                    Carfax Report
+                  </a>
+                </div>
+                <div id="inspectionContainer" class="hidden pt-4">
+                  <a id="inspectionLink" href="#" target="_blank"
+                    class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-center w-full">
+                    Inspection Report
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features Section - Full Width -->
+        <div class="border-t p-4 md:p-8 bg-gray-50">
+          <h3 class="text-lg md:text-xl font-bold mb-4 md:mb-6">Features</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12" id="featuresContainer">
+            <!-- Luxury Features -->
+            <div>
+              <h4 class="font-bold mb-3 md:mb-4 text-base md:text-lg text-gray-800">Luxury</h4>
+              <ul id="luxuryFeatures" class="space-y-2 md:space-y-3">
+                <!-- Luxury features will be inserted here -->
+              </ul>
+            </div>
+
+            <!-- Safety Features -->
+            <div>
+              <h4 class="font-bold mb-3 md:mb-4 text-base md:text-lg text-gray-800">Safety</h4>
+              <ul id="safetyFeatures" class="space-y-2 md:space-y-3">
+                <!-- Safety features will be inserted here -->
+              </ul>
+            </div>
+
+            <!-- Entertainment Features -->
+            <div>
+              <h4 class="font-bold mb-3 md:mb-4 text-base md:text-lg text-gray-800">Entertainment</h4>
+              <ul id="entertainmentFeatures" class="space-y-2 md:space-y-3">
+                <!-- Entertainment features will be inserted here -->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showCarDetails(src, fields) {
+      modalTitle.textContent = `${fields.atYear} ${fields.atMake} ${fields.atModel} ${fields.atTrimline}`;
+
+      iframeContainer.innerHTML = `
+   <iframe src="${src}" 
+     allow="fullscreen" 
+     allowfullscreen="true" 
+     loading="lazy"
+     width="100%" 
+     height="100%" 
+     frameborder="0" 
+     scrolling="no"
+     sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms">
+   </iframe>`;
+
+      updateVehicleInfo(fields);
+      updateFeatures(fields.features);
+
+      const carfaxContainer = document.getElementById('carfaxContainer');
+      const carfaxLink = document.getElementById('carfaxLink');
+      const inspectionContainer = document.getElementById('inspectionContainer');
+      const inspectionLink = document.getElementById('inspectionLink');
+
+      if (fields.atCarfax) {
+        carfaxContainer.classList.remove('hidden');
+        carfaxLink.href = fields.atCarfax;
+        carfaxLink.classList.remove('opacity-50', 'cursor-not-allowed');
+        carfaxLink.textContent = 'View Carfax Report';
+      } else {
+        carfaxContainer.classList.remove('hidden');
+        carfaxLink.href = '#';
+        carfaxLink.classList.add('opacity-50', 'cursor-not-allowed');
+        carfaxLink.textContent = 'Carfax N/A';
+      }
+
+      if (fields.atInspection) {
+        inspectionContainer.classList.remove('hidden');
+        inspectionLink.href = fields.atInspection;
+        inspectionLink.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+        inspectionContainer.classList.remove('hidden');
+        inspectionLink.href = '#';
+        inspectionLink.classList.add('opacity-50', 'cursor-not-allowed');
+        inspectionLink.textContent = 'Inspection N/A';
+      }
+    }
+
+    function updateVehicleInfo(fields) {
+      const container = document.getElementById('vehicleInfoContainer');
+      container.innerHTML = ''; // Clear previous info
+
+      const infoFields = [
+        { key: 'stock_number', icon: '📋', label: 'Stock Number' },
+        { key: 'atYear', icon: '📅', label: 'Year' },
+        { key: 'atMake', icon: '🏢', label: 'Make' },
+        { key: 'atModel', icon: '🔰', label: 'Model' },
+        { key: 'atTrimline', icon: '⭐', label: 'Trim' },
+        { key: 'atKM', icon: '⚡', label: 'Mileage' },
+        { key: 'vin', icon: '🔢', label: 'VIN' },
+        { key: 'atLocation', icon: '🔍', label: 'Location' },
+        { key: 'atType', icon: '🚗', label: 'Car Type' },
+        { key: 'fuel_type', icon: '⛽', label: 'Fuel Type' },
+        { key: 'engine', icon: '🔧', label: 'Engine' },
+        { key: 'atDrive', icon: '🔄', label: 'Drive Train' },
+        { key: 'transmission', icon: '⚙️', label: 'Transmission' },
+        { key: 'atSeats', icon: '🚪', label: 'Doors' },
+        { key: 'seating', icon: '💺', label: 'Seating' },
+        { key: 'atColor', icon: '🎨', label: 'Exterior Color' },
+        { key: 'interior_color', icon: '🎨', label: 'Interior Color' },
+        { key: 'atDeclaration', icon: '⚠️', label: 'Carfax Damage' }
+      ];
+
+      infoFields.forEach(field => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center gap-3';
+        div.innerHTML = `
+     <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+       <span>${field.icon}</span>
+     </div>
+     <div>
+       <div class="text-sm text-gray-600">${field.label}</div>
+       <div class="font-medium">${fields[field.key] || 'N/A'}</div>
+     </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    function updateFeatures(features) {
+      const updateFeatureList = (containerId, featureList) => {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        if (featureList && featureList.length) {
+          featureList.forEach(feature => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center space-x-2';
+            li.innerHTML = `
+         <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+         </svg>
+         <span>${feature}</span>`;
+            container.appendChild(li);
+          });
+        }
+      };
+
+      updateFeatureList('luxuryFeatures', features?.luxury_features);
+      updateFeatureList('safetyFeatures', features?.safety_features);
+      updateFeatureList('entertainmentFeatures', features?.entertainment_features);
+    }
+
+    window.onload = async function () {
+      const vin = window.location.pathname.split('/').pop();
+      try {
+        const response = await fetch(`/api/inventory/car/${vin}`);
+        const carData = await response.json();
+        showCarDetails(carData.src, carData);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+  </script>
+
+  <%- include('partials/footer') %>

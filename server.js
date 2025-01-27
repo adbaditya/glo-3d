@@ -325,6 +325,25 @@ app.get('/', async (req, res) => {
   }
 });
 
+app.get('/car/:vin', async (req, res) => {
+  try {
+    const { vin } = req.params;
+    const data = await fetchInventoryData({});
+    const car = data.data.find(item => item.vin === vin);
+
+    if (!car) {
+      return res.status(404).send('Car not found');
+    }
+
+    res.render('car-details', { car });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Server error');
+  }
+});
+
+// Add this route before your main route
+
 app.get('/main-grid', async (req, res) => {
   try {
     const filters = {
