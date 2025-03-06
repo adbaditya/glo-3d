@@ -219,6 +219,7 @@ app.get('/', async (req, res) => {
       'IN FUNDING',
       'BOOKED | NOT DELIVERED',
       'BOOKED | DELIVERED',
+      'CHASE',
       'DO NOT SELL',
       'VOID | IN STOCK',
       'VOID | OUTSOURCED',
