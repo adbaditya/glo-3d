@@ -45,7 +45,9 @@ class Cache {
   }
 
   clear() {
+    console.log('Clearing cache');
     this.cache.clear();
+    console.log('Cache cleared, size:', this.cache.size);
   }
 }
 
@@ -72,16 +74,29 @@ async function fetchInventoryData(filters) {
   if (cachedData) {
     console.log('Serving from cache:', {
       dataLength: cachedData.data?.length,
-      //sampleItem: cachedData.data?.[0]
     });
     return cachedData;
   }
 
-  //console.log('Fetching fresh data');
+  console.log('Making fresh API call');
   const [gloResponse, vinData] = await Promise.all([
-    glo3dApi.post('?=application/json&', {}, { params: filters }),
+    glo3dApi.post('', {
+      offset: 0,
+      limit: 1000,
+      captureType: "all",
+      responseType: "all",
+      privacy: "public",
+      ...filters
+    }),
     fetchVinStatuses()
   ]);
+
+  console.log('GLO3D API Response:', {
+    total: gloResponse.data.total,
+    pageSize: gloResponse.data.pageSize,
+    remaining: gloResponse.data.remaining,
+    dataLength: gloResponse.data.data?.length
+  });
 
   const data = gloResponse.data;
 
@@ -90,11 +105,6 @@ async function fetchInventoryData(filters) {
       .filter(item => vinData[item.vin])
       .map(item => {
         const customerUrl = item.src;
-
-        if (data.data.indexOf(item) === 0) {
-          //console.log('Sample transformed item:', item);
-        }
-
         return {
           ...item,
           customerUrl,
@@ -108,7 +118,7 @@ async function fetchInventoryData(filters) {
             atKM: '',
             atColor: '',
             atCost: '',
-            atLocation: [req.query.location],
+            atLocation: filters.location ? [filters.location] : [],
             atDrive: '',
             atSeats: '',
             atType: '',
@@ -125,8 +135,6 @@ async function fetchInventoryData(filters) {
   }
 
   console.log('Processed data length:', data.data.length);
-  //console.log('Sample processed item:', data.data[0]);
-
   inventoryCache.set(cacheKey, data);
   return data;
 }
@@ -464,7 +472,8 @@ app.get('/inventory-table', async (req, res) => {
   }
 });
 
-app.post('/api/clear-cache', (req, res) => {
+app.all('/api/clear-cache', (req, res) => {
+  console.log('Clearing cache...');
   inventoryCache.clear();
   res.json({ success: true, message: 'Cache cleared successfully' });
 });
