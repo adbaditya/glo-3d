@@ -108,6 +108,7 @@ async function fetchInventoryData(filters) {
         return {
           ...item,
           customerUrl,
+          interior_color: item.fields?.interior_color,
           ...(vinData[item.vin] || {
             status: 'Unknown',
             atYear: '',
