@@ -578,16 +578,6 @@ async function fetchVinStatuses() {
       const vin = record.get('VIN.');
       const status = record.get('STATUS');
       if (vin) {
-
-        if (Object.keys(vinData).length < 3) {
-          console.log(`VIN ${vin} raw data:`, {
-            ENGINE: record.get('ENGINE'),
-            FUEL: record.get('FUEL'),
-            'A/M': record.get('A/M'),
-            SEATS: record.get('SEATS')
-          });
-        }
-
         vinData[vin] = {
           status: (record.get('STATUS') || [])[0] || 'Unknown',
           atYear: record.get('YEAR'),
@@ -617,7 +607,7 @@ async function fetchVinStatuses() {
         };
       }
     });
-    console.log(vinData);
+    //console.log(vinData);
     statusCache.set(cacheKey, vinData);
     return vinData;
   } catch (error) {
