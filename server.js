@@ -246,12 +246,12 @@ app.get('/', async (req, res) => {
       inventory = inventory.filter(item => {
         const itemLocations = Array.isArray(item.atLocation) ? item.atLocation : [item.atLocation];
         const queryLocation = req.query.location.toUpperCase();
-        
+
         console.log(`VIN ${item.vin}:`, {
           locations: itemLocations,
           query: queryLocation
         });
-        
+
         return itemLocations.some(loc => loc && loc.toUpperCase() === queryLocation);
       });
     }
@@ -572,12 +572,22 @@ async function fetchVinStatuses() {
   const vinData = {};
   try {
     const records = await base('SINGLE INVENTORY').select({
-      fields: ['VIN.', 'STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'STOCK LOCATION.', 'CARFAX LINK', 'KM', 'COLOUR', 'COST.', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECS $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC']
+      fields: ['VIN.', 'STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'STOCK LOCATION.', 'CARFAX LINK', 'KM', 'COLOUR', 'COST.', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECS $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC', 'ENGINE', 'FUEL', 'A/M', 'SEATS']
     }).all();
     records.forEach(record => {
       const vin = record.get('VIN.');
       const status = record.get('STATUS');
       if (vin) {
+
+        if (Object.keys(vinData).length < 3) {
+          console.log(`VIN ${vin} raw data:`, {
+            ENGINE: record.get('ENGINE'),
+            FUEL: record.get('FUEL'),
+            'A/M': record.get('A/M'),
+            SEATS: record.get('SEATS')
+          });
+        }
+
         vinData[vin] = {
           status: (record.get('STATUS') || [])[0] || 'Unknown',
           atYear: record.get('YEAR'),
@@ -599,11 +609,15 @@ async function fetchVinStatuses() {
           atInspection: record.get('INSPECTED'),
           atDetailed: record.get('DETAILED'),
           atNewPics: record.get('NEW PICS'),
-          atAFC: record.get('AFC')
+          atAFC: record.get('AFC'),
+          engine: record.get('ENGINE'),
+          transmission: record.get('A/M'),
+          fuel_type: record.get('FUEL'),
+          seating: record.get('SEATS')
         };
       }
     });
-    //console.log(vinData);
+    console.log(vinData);
     statusCache.set(cacheKey, vinData);
     return vinData;
   } catch (error) {
