@@ -573,7 +573,7 @@ async function fetchVinStatuses() {
   const vinData = {};
   try {
     const records = await base('SINGLE INVENTORY').select({
-      fields: ['VIN.', 'STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'STOCK LOCATION.', 'CARFAX LINK', 'KM', 'COLOUR', 'COST.', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECS $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC', 'ENGINE', 'FUEL', 'A/M', 'SEATS']
+      fields: ['VIN.', 'STATUS', 'YEAR', 'MAKE', 'MODEL', 'TRIMLINE', 'STOCK LOCATION.', 'CARFAX ATTACHMENT', 'KM', 'COLOUR', 'TOTAL COST(Archive)', 'PURCHASE PROVINCE', 'DRIVE', 'SEATS', 'TYPE', 'DECS $', 'ON SITE', 'INSPECTED', 'DETAILED', 'NEW PICS', 'AFC', 'ENGINE', 'FUEL', 'A/M', 'SEATS']
     }).all();
     records.forEach(record => {
       const vin = record.get('VIN.');
@@ -585,10 +585,10 @@ async function fetchVinStatuses() {
           atMake: record.get('MAKE'),
           atModel: record.get('MODEL'),
           atTrimline: record.get('TRIMLINE'),
-          atCarfax: record.get('CARFAX LINK'),
+          atCarfax: record.get('CARFAX ATTACHMENT'),
           atKM: record.get('KM'),
           atColor: record.get('COLOUR'),
-          atCost: record.get('COST.'),
+          atCost: record.get('TOTAL COST(Archive)'),
           atLocation: Array.isArray(record.get('STOCK LOCATION.')) ?
             record.get('STOCK LOCATION.') :
             [record.get('STOCK LOCATION.')].filter(Boolean),
